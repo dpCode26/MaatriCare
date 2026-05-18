@@ -99,9 +99,6 @@
   --sidebar-ring: #f08b95;
 }
 
-/* =========================
-   THEME INLINE
-========================= */
 
 @theme inline {
   --color-background: var(--background);
