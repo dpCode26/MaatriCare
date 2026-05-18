@@ -2,108 +2,176 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 bg-[#f6faf7]">
+    <main className="relative min-h-screen overflow-hidden bg-background px-6 py-3 lg:px-16">
 
-      <div className="max-w-5xl w-full grid lg:grid-cols-2 gap-16 items-center">
+      <div className="absolute left-[-120px] top-[-120px] h-[320px] w-[320px] rounded-full bg-primary/15 blur-3xl" />
 
-        <div className="space-y-7">
+      <div className="absolute bottom-[-140px] right-[-120px] h-[340px] w-[340px] rounded-full bg-accent/15 blur-3xl" />
 
-          <div className="inline-flex items-center rounded-full bg-green-100 px-4 py-2 text-sm font-medium text-green-700">
-            AI-Powered Maternal Healthcare Platform
-          </div>
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center">
 
-          <div className="space-y-6">
+        <div className="grid w-full items-center gap-30 lg:grid-cols-2">
 
-            <h1 className="text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-[#111827]">
-              Smarter Healthcare For
-              <span className="text-[#1f3c88]"><br/ >Every Mother</span>
-            </h1>
+          {/* LEFT CONTENT */}
 
-            <p className="text-lg text-gray-600 leading-8 max-w-xl">
-              MaatriCare helps ASHA workers, doctors, and patients
-              collaborate through AI-driven maternal healthcare monitoring,
-              risk analysis, and real-time care management.
-            </p>
-          </div>
+          <div className="space-y-3 text-center lg:text-left">
 
-          <div className="flex flex-wrap gap-4">
+            <div className="inline-flex items-center rounded-full border border-primary/30 bg-secondary/30 px-4 py-1 text-sm font-semibold text-brown">
+              AI-Powered Maternal Healthcare Platform
+            </div>
 
-            <Link
-              href="/login"
-              className="h-14 px-8 rounded-2xl bg-[#1f3c88] hover:bg-[#183170] text-white font-semibold flex items-center justify-center transition-all duration-200 shadow-lg shadow-blue-200"
-            >
-              Login
-            </Link>
+            <div className="space-y-7">
 
-            <Link
-              href="/register"
-              className="h-14 px-8 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-semibold flex items-center justify-center transition-all duration-200"
-            >
-              Register
-            </Link>
+              <h1 className="text-2xl font-black leading-[1.06] tracking-[-0.04em] text-foreground sm:text-6xl lg:text-7xl">
 
-          </div>
-        </div>
+                Smarter Care
+                <br />
 
-        <div className="relative">
+                For Every
+                <span className="block text-primary">
+                  Mother
+                </span>
+              </h1>
 
-          <div className="bg-white rounded-[32px] p-10 shadow-xl border border-gray-100">
+              <p className="max-w-xl text-md leading-6 text-muted-foreground">
+                MaatriCare empowers ASHA workers, doctors, and pregnant women
+                with AI-driven maternal risk analysis, real-time health
+                tracking, and multilingual care support across rural India.
+              </p>
+            </div>
 
-            <div className="space-y-6">
+            <div className="flex flex-col gap-4 py-5 sm:flex-row sm:justify-center lg:justify-start">
 
-              <div className="flex items-center justify-between">
+              <Link
+                href="/register"
+                className="flex h-12 items-center justify-center rounded-2xl bg-primary px-6 text-base font-semibold text-white shadow-xl shadow-primary/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+              >
+                Get Started
+              </Link>
 
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Active Monitoring
-                  </p>
+              <Link
+                href="/login"
+                className="flex h-12 items-center justify-center rounded-2xl border border-border bg-white/80 px-6 text-base font-semibold text-foreground backdrop-blur-sm transition-all duration-300 hover:bg-white"
+              >
+                Login
+              </Link>
+            </div>
 
-                  <h2 className="text-3xl font-bold mt-1">
-                    1,248 Patients
-                  </h2>
-                </div>
+            {/* <div className="flex flex-wrap justify-center gap-8 pt-4 lg:justify-start">
 
-                <div className="h-16 w-16 rounded-2xl bg-green-100 flex items-center justify-center text-3xl">
-                  ❤️
-                </div>
+              <div>
+                <h3 className="text-3xl font-black text-primary">1200+</h3>
+                <p className="text-sm text-muted-foreground">
+                  Mothers Monitored
+                </p>
               </div>
 
-              <div className="space-y-4">
+              <div>
+                <h3 className="text-3xl font-black text-accent">85%</h3>
+                <p className="text-sm text-muted-foreground">
+                  Faster Risk Detection
+                </p>
+              </div>
 
-                <div className="rounded-2xl bg-[#f6faf7] p-5 border border-green-100">
+              <div>
+                <h3 className="text-3xl font-black text-secondary">24/7</h3>
+                <p className="text-sm text-muted-foreground">
+                  AI Health Tracking
+                </p>
+              </div>
+
+            </div> */}
+          </div>
+
+          {/* RIGHT SIDE */}
+
+          <div className="relative">
+
+            <div className="absolute inset-0 rounded-[40px] bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/10 blur-3xl" />
+
+            <div className="relative overflow-hidden rounded-[36px] border border-white/60 bg-white/80 p-5 shadow-[0_20px_80px_rgba(231,111,122,0.15)] backdrop-blur-xl">
+
+              <div className="space-y-2">
+
+                <div className="flex items-center justify-between">
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Active Monitoring
+                    </p>
+
+                    <h2 className="mt-2 text-4xl font-black text-foreground">
+                      1,247
+                    </h2>
+                  </div>
+
+                  <div className="flex h-18 w-18 items-center justify-center rounded-3xl bg-primary/10 text-3xl">
+                    🤱
+                  </div>
+                </div>
+
+                {/* ALERT CARD */}
+
+                <div className="rounded-4xl border border-red-100 bg-red-50 p-6">
+
                   <div className="flex items-center justify-between">
 
                     <div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-red-400">
                         High Risk Alerts
                       </p>
 
-                      <h3 className="text-2xl font-bold text-red-500">
+                      <h3 className="mt-2 text-2xl font-black text-red-500">
                         12 Critical
                       </h3>
                     </div>
 
-                    <div className="text-2xl">
+                    <div className="text-3xl">
                       🚨
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-[#f6f8ff] p-5 border border-blue-100">
+                {/* AI CARD */}
+
+                <div className="rounded-3xl border border-accent/10 bg-accent/5 p-6">
+
                   <div className="flex items-center justify-between">
 
                     <div>
-                      <p className="text-sm text-gray-500">
-                        AI Risk Analysis
+                      <p className="text-sm text-accent">
+                        Gemini AI Analysis
                       </p>
 
-                      <h3 className="text-2xl font-bold text-[#1f3c88]">
-                        Real-Time Monitoring
+                      <h3 className="mt-2 text-2xl font-black text-foreground">
+                        24/7 &nbsp; Risk Prediction
                       </h3>
                     </div>
 
-                    <div className="text-2xl">
+                    <div className="text-3xl">
                       📊
+                    </div>
+                  </div>
+                </div>
+
+                {/* HINDI SUPPORT */}
+
+                <div className="rounded-3xl border border-secondary/20 bg-secondary/10 p-6">
+
+                  <div className="flex items-center justify-between">
+
+                    <div>
+                      <p className="text-sm text-orange-500">
+                        Multilingual Support
+                      </p>
+
+                      <h3 className="mt-2 text-2xl font-black text-foreground">
+                        हिंदी Enabled
+                      </h3>
+                    </div>
+
+                    <div className="text-3xl">
+                      🌏
                     </div>
                   </div>
                 </div>
@@ -113,7 +181,6 @@ export default function Home() {
           </div>
 
         </div>
-
       </div>
     </main>
   );
