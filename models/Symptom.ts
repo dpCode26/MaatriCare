@@ -1,7 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
 export const SYMPTOM_OPTIONS = [
   'headache', 'blurred_vision', 'abdominal_pain', 'reduced_fetal_movement',
   'bleeding', 'swelling', 'fever', 'vomiting', 'breathlessness',
@@ -9,8 +7,6 @@ export const SYMPTOM_OPTIONS = [
 ] as const;
 
 export type SymptomOption = typeof SYMPTOM_OPTIONS[number];
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface ISymptom extends Document {
   patientId:  mongoose.Types.ObjectId;
@@ -23,8 +19,6 @@ export interface ISymptom extends Document {
   createdAt:  Date;
   updatedAt:  Date;
 }
-
-// ─── Schema ──────────────────────────────────────────────────────────────────
 
 const symptomSchema = new Schema<ISymptom>(
   {
@@ -39,13 +33,9 @@ const symptomSchema = new Schema<ISymptom>(
   { timestamps: true }
 );
 
-// ─── Indexes ─────────────────────────────────────────────────────────────────
-
 symptomSchema.index({ patientId: 1, loggedAt: -1 });  // patient symptom history
 symptomSchema.index({ escalated: 1, loggedAt: -1 });  // dashboard: escalated alerts
 symptomSchema.index({ severity: -1 });                // sort by most severe
-
-// ─── Model ───────────────────────────────────────────────────────────────────
 
 const Symptom: Model<ISymptom> =
   (mongoose.models.Symptom as Model<ISymptom>) ||

@@ -1,7 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export type AlertTrigger  = 'visit' | 'symptom' | 'ai' | 'manual';
 export type AlertSeverity = 'medium' | 'high' | 'critical';
 
@@ -29,8 +27,6 @@ export interface IAlert extends Document {
   updatedAt:   Date;
 }
 
-// ─── Schema ──────────────────────────────────────────────────────────────────
-
 const alertSchema = new Schema<IAlert>(
   {
     patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
@@ -55,15 +51,11 @@ const alertSchema = new Schema<IAlert>(
   { timestamps: true }
 );
 
-// ─── Indexes ─────────────────────────────────────────────────────────────────
-
 alertSchema.index({ patientId: 1, createdAt: -1 });       // patient alert history
 alertSchema.index({ ashaId: 1, resolved: 1 });            // ASHA's unresolved alerts
 alertSchema.index({ doctorId: 1, resolved: 1 });          // doctor's pending alerts
 alertSchema.index({ severity: 1, resolved: 1 });          // dashboard: critical unresolved
 alertSchema.index({ resolved: 1, createdAt: -1 });        // global alert queue by time
-
-// ─── Validation ──────────────────────────────────────────────────────────────
 
 // Ensure resolvedAt is set when resolved is true
 alertSchema.pre('save', function () {
@@ -71,8 +63,6 @@ alertSchema.pre('save', function () {
     this.resolvedAt = new Date();
   }
 });
-
-// ─── Model ───────────────────────────────────────────────────────────────────
 
 const Alert: Model<IAlert> =
   (mongoose.models.Alert as Model<IAlert>) ||

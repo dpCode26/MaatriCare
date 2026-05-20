@@ -1,7 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export type FetalMovement   = 'normal' | 'reduced' | 'none' | 'not_checked';
 export type VomitingLevel   = 'none' | 'mild' | 'severe';
 export type UrineAlbumin    = 'negative' | 'trace' | 'positive' | 'not_checked';
@@ -51,8 +49,6 @@ export interface IVisit extends Document {
   updatedAt: Date;
 }
 
-// ─── Schema ──────────────────────────────────────────────────────────────────
-
 const visitSchema = new Schema<IVisit>(
   {
     patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
@@ -95,14 +91,10 @@ const visitSchema = new Schema<IVisit>(
   { timestamps: true }
 );
 
-// ─── Indexes ─────────────────────────────────────────────────────────────────
-
 visitSchema.index({ patientId: 1, visitDate: -1 });       // patient visit history, newest first
 visitSchema.index({ ashaId: 1, visitDate: -1 });          // ASHA's visits by date
 visitSchema.index({ 'aiRiskResult.escalate': 1 });        // quickly find visits needing escalation
 visitSchema.index({ 'aiRiskResult.riskLevel': 1 });       // filter by AI risk level
-
-// ─── Model ───────────────────────────────────────────────────────────────────
 
 const Visit: Model<IVisit> =
   (mongoose.models.Visit as Model<IVisit>) ||

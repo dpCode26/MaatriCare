@@ -1,7 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 export type OutcomeStatus = 'ongoing' | 'delivered' | 'loss' | 'referred';
@@ -17,11 +15,11 @@ export interface IPatient extends Document {
   bloodGroup?:      BloodGroup;
 
   // Pregnancy
-  lmp:              Date;
-  edd?:             Date;
-  gravida:          number;
-  parity:           number;
-  abortions:        number;
+  lmp:              Date; //last menstrual cycle
+  edd?:             Date; //exp. delivery date
+  gravida:          number; //total preg.
+  parity:           number; //births beyond viable gestation
+  abortions:        number; //terminations
 
   // Risk
   riskLevel:        RiskLevel;
@@ -46,8 +44,6 @@ export interface IPatient extends Document {
   // Virtual
   weeksPregnant:    number;
 }
-
-// ─── Schema ──────────────────────────────────────────────────────────────────
 
 const patientSchema = new Schema<IPatient>(
   {
@@ -91,17 +87,13 @@ const patientSchema = new Schema<IPatient>(
   }
 );
 
-// ─── Indexes ─────────────────────────────────────────────────────────────────
-
 patientSchema.index({ ashaId: 1 });               // ASHA fetches her patients
 patientSchema.index({ userId: 1 }, { unique: true }); // one patient profile per user
 patientSchema.index({ riskLevel: 1 });             // filter by risk
 patientSchema.index({ village: 1, district: 1 });  // location-based queries
 
-// ─── Hooks ───────────────────────────────────────────────────────────────────
-
 // Auto-compute EDD from LMP (LMP + 280 days)
-patientSchema.pre('save', function () {
+patientSchema.pre('save', function () {  //pre-save Hook (middleware executed)
   if (this.lmp && !this.edd) {
     const edd = new Date(this.lmp);
     edd.setDate(edd.getDate() + 280);
@@ -109,15 +101,11 @@ patientSchema.pre('save', function () {
   }
 });
 
-// ─── Virtuals ────────────────────────────────────────────────────────────────
-
 patientSchema.virtual('weeksPregnant').get(function () {
   if (!this.lmp) return 0;
-  const diff = Date.now() - new Date(this.lmp).getTime();
+  const diff = Date.now() - new Date(this.lmp).getTime(); //preg. duration
   return Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
 });
-
-// ─── Model ───────────────────────────────────────────────────────────────────
 
 const Patient: Model<IPatient> =
   (mongoose.models.Patient as Model<IPatient>) ||

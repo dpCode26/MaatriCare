@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export type UserRole = 'asha' | 'patient' | 'doctor';
+export type UserRole = 'asha' | 'patient' | 'doctor'; 
 export type UserLanguage = 'hi' | 'en';
 
 export interface IUser extends Document {
@@ -38,10 +38,10 @@ const userSchema = new Schema<IUser>(
 
 
 userSchema.index({ role: 1 });
-userSchema.index({ village: 1, district: 1 });  // common query pattern for ASHA workers
-
-userSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
+userSchema.index({ village: 1, district: 1 });  // domain driven optimisation
+userSchema.pre('save', async function ()  
+{
+  if (!this.isModified('password')) return;  // this must refer to curr document
   this.password = await bcrypt.hash(this.password, 12);
 });
 

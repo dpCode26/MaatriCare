@@ -68,11 +68,11 @@ const patientMenu = [
     icon: LayoutDashboard,
     href: "/patient",
   },
-  {
-    title: "My Profile",
-    icon: UserRound,
-    href: "/patient/profile",
-  },
+  // {
+  //   title: "My Profile",
+  //   icon: UserRound,
+  //   href: "/patient/profile",
+  // },
   {
     title: "Health Records",
     icon: FileText,
@@ -97,14 +97,20 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-[260px] h-screen bg-primary/20 border-r border-[#f08b95]/20 flex flex-col justify-between">
-
+    <aside
+      className="w-[260px] h-screen bg-gradient-to-b from-[#fff7f5] via-[#fffaf8] to-[#fdf3ef] border-r border-[rgba(231,111,122,0.12)] backdrop-blur-xl shadow-[4px_0_30px_rgba(231,111,122,0.05)] flex flex-col justify-between"
+    >
       <div>
 
-        <div className="h-16 sm:h-20 flex items-center px-6 border-b border-[#f08b95]/50">
+        <div className="h-12 sm:h-20 flex items-center px-6 border-b border-[rgba(231,111,122,0.12)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#e76f7a] to-[#f4a261] shadow-lg">
 
-          <h1 className="text-2xl font-bold text-[#1f2a44] ">
-            MaatriCARE
+                  <HeartPulse className="text-white" size={24} />
+
+                </div>
+                &nbsp;
+          <h1 className="text-2xl font-bold text-[#1f2937] tracking-[-0.01em]">
+            MAATRICARE
           </h1>
 
         </div>
@@ -124,11 +130,10 @@ export default function Sidebar() {
                   <Link
                     href={item.href}
                     className={`flex items-center justify-between px-4 py-4 rounded-2xl transition-all duration-200
-                    ${
-                      isActive
+                    ${isActive
                         ? "bg-white shadow-sm"
                         : "hover:bg-white/70"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-4">
 
@@ -162,7 +167,7 @@ export default function Sidebar() {
 
           <div className="flex items-center gap-3">
 
-            <div className="w-12 h-12 rounded-full bg-blue-200" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary)]/20 to-[var(--accent)]/20" />
 
             <div>
               <p className="text-sm text-gray-500">
