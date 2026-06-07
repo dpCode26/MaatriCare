@@ -1,7 +1,7 @@
 // app/(dashboard)/asha/patients/new/page.tsx
-
 "use client";
-
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,9 +43,41 @@ export default function NewPatientPage() {
     resolver: zodResolver(patientSchema),
   });
 
-  async function onSubmit(values: PatientFormValues) {
-    console.log(values);
-  }
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (values: any) => {
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/patients", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Something went wrong");
+      }
+
+      alert("Patient registered successfully");
+
+      console.log(data);
+
+      // OPTIONAL:
+      // redirect after success
+      // router.push("/asha/patients");
+
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -364,12 +396,12 @@ export default function NewPatientPage() {
             </select>
           </div>
         </section>
-        
+
         <Button
-          type="submit"
+          type="submit" disabled={loading}
           className="h-14 w-full rounded-2xl bg-[#e76f7a] text-base font-semibold text-white hover:bg-[#de5f6c]"
         >
-          Register Patient
+          {loading ? "Registering..." : "Register Patient"}Register Patient
         </Button>
       </form>
     </div>
