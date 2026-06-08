@@ -7,6 +7,7 @@ interface Params {
   params: { id: string };
 }
 
+
 export async function GET(_req: NextRequest, { params }: Params) {
   await connectDB();
   const session = await auth();
@@ -16,6 +17,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!visit) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(visit);
 }
+
 
 export async function PUT(req: NextRequest, { params }: Params) {
   await connectDB();

@@ -19,6 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const patientSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  phone: z.string().min(10),
   age: z.coerce.number().min(15).max(50),
   aadhaarLast4: z.string().max(4).optional(),
   bloodGroup: z.string(),
@@ -143,12 +146,48 @@ export default function NewPatientPage() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-[#1f2937]">
+                Patient Name
+              </label>
+
+              <Input
+                placeholder="Enter patient name"
+                {...register("name")}
+                className="h-12 rounded-2xl border-[#ead7d2]"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[#1f2937]">
+                Email
+              </label>
+
+              <Input
+                type="email"
+                placeholder="Enter email"
+                {...register("email")}
+                className="h-12 rounded-2xl border-[#ead7d2]"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[#1f2937]">
+                Phone Number
+              </label>
+
+              <Input
+                placeholder="Enter phone number"
+                {...register("phone")}
+                className="h-12 rounded-2xl border-[#ead7d2]"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[#1f2937]">
                 Age
               </label>
 
               <Input
                 type="number"
-                placeholder=""
                 {...register("age")}
                 className="h-12 rounded-2xl border-[#ead7d2]"
               />
@@ -188,13 +227,14 @@ export default function NewPatientPage() {
               </label>
 
               <Input
-                placeholder=""
                 maxLength={4}
                 {...register("aadhaarLast4")}
                 className="h-12 rounded-2xl border-[#ead7d2]"
               />
             </div>
+
           </div>
+
         </section>
 
         {/* PREGNANCY */}
@@ -401,7 +441,7 @@ export default function NewPatientPage() {
           type="submit" disabled={loading}
           className="h-14 w-full rounded-2xl bg-[#e76f7a] text-base font-semibold text-white hover:bg-[#de5f6c]"
         >
-          {loading ? "Registering..." : "Register Patient"}Register Patient
+          {loading ? "Registering..." : "Register Patient"}
         </Button>
       </form>
     </div>

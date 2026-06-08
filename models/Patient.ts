@@ -47,7 +47,7 @@ export interface IPatient extends Document {
 
 const patientSchema = new Schema<IPatient>(
   {
-    userId:   { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userId:   { type: Schema.Types.ObjectId, ref: 'User'},
     ashaId:   { type: Schema.Types.ObjectId, ref: 'User', required: true },
     doctorId: { type: Schema.Types.ObjectId, ref: 'User' },
 
@@ -88,7 +88,7 @@ const patientSchema = new Schema<IPatient>(
 );
 
 patientSchema.index({ ashaId: 1 });               // ASHA fetches her patients
-patientSchema.index({ userId: 1 }, { unique: true }); // one patient profile per user
+// patientSchema.index({ userId: 1 }, { unique: true }); // one patient profile per user
 patientSchema.index({ riskLevel: 1 });             // filter by risk
 patientSchema.index({ village: 1, district: 1 });  // location-based queries
 

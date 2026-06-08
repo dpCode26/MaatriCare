@@ -1,6 +1,6 @@
 //Patient list
 "use client";
-
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import {
@@ -16,50 +16,33 @@ import {
   HeartPulse,
 } from "lucide-react";
 
-const patients = [
-  {
-    id: 1,
-    name: "Suman Devi",
-    village: "Mithapur",
-    district: "Patna",
-    weeks: 31,
-    risk: "high",
-    blood: "O+",
-    lastVisit: "2 Days Ago",
-  },
-  {
-    id: 2,
-    name: "Radha Kumari",
-    village: "Nalanda",
-    district: "Bihar",
-    weeks: 22,
-    risk: "medium",
-    blood: "B+",
-    lastVisit: "4 Days Ago",
-  },
-  {
-    id: 3,
-    name: "Neha Singh",
-    village: "Gaya",
-    district: "Bihar",
-    weeks: 18,
-    risk: "low",
-    blood: "A+",
-    lastVisit: "1 Week Ago",
-  },
-  {
-    id: 4,
-    name: "Pooja Devi",
-    village: "Patna",
-    district: "Bihar",
-    weeks: 35,
-    risk: "high",
-    blood: "AB+",
-    lastVisit: "Yesterday",
-  },
-];
 
 export default function PatientsPage() {
+
+  const [patients, setPatients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  async function fetchPatients() {
+    try {
+      const res = await fetch("/api/patients");
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch patients");
+      }
+
+      const data = await res.json();
+
+      setPatients(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <main className="min-h-screen">
@@ -305,7 +288,7 @@ export default function PatientsPage() {
 
           <Link
             key={patient.id}
-            href={`/asha/patients/${patient.id}`}
+            href={`/asha/patients/${patient._id}`}
             className="
               group overflow-hidden
               rounded-[32px]
@@ -354,7 +337,7 @@ export default function PatientsPage() {
                       text-slate-900
                     "
                   >
-                    {patient.name}
+                    {patient.userId?.name}
                   </h2>
 
                   <div className="mt-2 flex items-center gap-2">
@@ -365,7 +348,7 @@ export default function PatientsPage() {
                     />
 
                     <p className="text-sm text-slate-500">
-                      {patient.village}, {patient.district}
+                      {patient.village || "N/A"}, {patient.district || "N/A"}
                     </p>
 
                   </div>
@@ -380,16 +363,15 @@ export default function PatientsPage() {
                   px-4 py-2
                   text-xs font-bold
                   border
-                  ${
-                    patient.risk === "high"
-                      ? "bg-red-100 text-red-600 border-red-200"
-                      : patient.risk === "medium"
+                  ${patient.riskLevel === "high"
+                    ? "bg-red-100 text-red-600 border-red-200"
+                    : patient.riskLevel === "medium"
                       ? "bg-orange-100 text-orange-600 border-orange-200"
                       : "bg-green-100 text-green-700 border-green-200"
                   }
                 `}
               >
-                {patient.risk.toUpperCase()}
+                {patient.riskLevel?.toUpperCase()}
               </div>
             </div>
 
@@ -400,12 +382,12 @@ export default function PatientsPage() {
               {[
                 {
                   label: "Weeks",
-                  value: patient.weeks,
+                  value: patient.weeksPregnant,
                   icon: CalendarDays,
                 },
                 {
                   label: "Blood",
-                  value: patient.blood,
+                  value: patient.bloodGroup,
                   icon: Activity,
                 },
                 {
@@ -461,7 +443,6 @@ export default function PatientsPage() {
             >
 
               <div>
-
                 <p className="text-xs text-slate-400">
                   AI Monitoring Status
                 </p>
@@ -490,7 +471,6 @@ export default function PatientsPage() {
                     group-hover:text-white
                   "
                 />
-
               </div>
             </div>
           </Link>

@@ -1,52 +1,109 @@
-import { connectDB } from '@/lib/db';
-import Patient from '@/models/Patient';
-import User from '@/models/User';
-import { auth } from '@/lib/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import mongoose from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
+
+import { connectDB } from "@/lib/db";
+import { auth } from "@/lib/auth";
+
+import Patient from "@/models/Patient";
+import User from "@/models/User";
 
 export async function GET() {
-  await connectDB();
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    await connectDB();
 
-  const patients = await Patient.find({ ashaId: session.user.id })
-    .populate('userId', 'name phone village')
-    .sort({ createdAt: -1 });
+    const session = await auth();
 
-  return NextResponse.json(patients);
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const patients = await Patient.find({
+      ashaId: session.user.id,
+    })
+      .populate("userId", "name phone village")
+      .sort({ createdAt: -1 });
+
+    return NextResponse.json(patients);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Failed to fetch patients" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
-  await connectDB();
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    await connectDB();
 
-  const body = await req.json();
+    const session = await auth();
 
-  const user = await User.create({
-    name: body.name,
-    email: body.email,
-    password: body.password || 'maatricare123',
-    role: 'patient',
-    phone: body.phone,
-    village: body.village,
-    district: body.district,
-  });
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-  const patient = await Patient.create({
-    userId: user._id,
-    ashaId: session.user.id,
-    age: body.age,
-    lmp: body.lmp,
-    bloodGroup: body.bloodGroup,
-    gravida: body.gravida,
-    parity: body.parity,
-    emergencyContact: body.emergencyContact,
-    emergencyPhone: body.emergencyPhone,
-    village: body.village,
-    district: body.district,
-    address: body.address,
-  });
+    const body = await req.json();
 
-  return NextResponse.json(patient, { status: 201 });
+    console.log("PATIENT BODY:", body);
+
+    // Required because your User model requires name + email
+    const user = await User.create({
+      name: body.name,
+      email: body.email,
+      password: body.password || "maatricare123",
+      role: "patient",
+      phone: body.phone,
+      village: body.village,
+      district: body.district,
+    });
+
+    const patient = await Patient.create({
+      userId: user._id,
+
+      ashaId: new mongoose.Types.ObjectId(
+        session.user.id
+      ),
+
+      age: body.age,
+      aadhaarLast4: body.aadhaarLast4,
+
+      bloodGroup: body.bloodGroup,
+
+      lmp: body.lmp,
+
+      gravida: body.gravida,
+      parity: body.parity,
+      abortions: body.abortions,
+
+      emergencyContact: body.emergencyContact,
+      emergencyPhone: body.emergencyPhone,
+
+      village: body.village,
+      district: body.district,
+      address: body.address,
+    });
+
+    return NextResponse.json(patient, {
+      status: 201,
+    });
+  } catch (error: any) {
+    console.error("PATIENT CREATE ERROR:", error);
+
+    return NextResponse.json(
+      {
+        error: error.message || "Failed to create patient",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }

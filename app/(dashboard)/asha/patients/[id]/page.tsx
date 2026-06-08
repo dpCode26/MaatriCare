@@ -1,5 +1,6 @@
 "use client";
-
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -20,23 +21,49 @@ import {
 } from "lucide-react";
 
 export default function PatientDetailsPage() {
-  const patient = {
-    name: "Suman Devi",
-    patientId: "MC-2026-1021",
-    age: 26,
-    bloodGroup: "O+",
-    village: "Mithapur",
-    district: "Patna",
-    weeksPregnant: 31,
-    gravida: 2,
-    parity: 1,
-    abortions: 0,
-    riskLevel: "high",
-    emergencyContact: "Ramesh Devi",
-    emergencyPhone: "+91 9876543210",
-    edd: "18 July 2026",
-    outcome: "ongoing",
+
+  const params = useParams();
+
+  const [patient, setPatient] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPatient();
+  }, []);
+
+  const loadPatient = async () => {
+    try {
+      const res = await fetch(`/api/patients/${params.id}`);
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch patient");
+      }
+
+      const data = await res.json();
+
+      setPatient(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!patient) {
+    return (
+      <div className="p-10">
+        Patient not found
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen p-2">
@@ -129,19 +156,21 @@ export default function PatientDetailsPage() {
                       text-slate-900
                     "
                   >
-                    {patient.name}
+                    {patient.userId?.name}
                   </h1>
 
                   <div
-                    className="
-                      rounded-full
-                      bg-red-100
-                      px-3 py-1
-                      text-sm font-semibold
-                      text-red-600
-                    "
+                    className={`rounded-full px-3 py-1 text-sm font-semibold
+    ${patient.riskLevel === "critical"
+                        ? "bg-red-200 text-red-700"
+                        : patient.riskLevel === "high"
+                          ? "bg-red-100 text-red-600"
+                          : patient.riskLevel === "medium"
+                            ? "bg-orange-100 text-orange-600"
+                            : "bg-green-100 text-green-600"
+                      }`}
                   >
-                    High Risk
+                    {patient.riskLevel?.toUpperCase()}
                   </div>
 
                 </div>
@@ -149,21 +178,21 @@ export default function PatientDetailsPage() {
                 <div className="mt-4 flex flex-wrap gap-3">
 
                   {[
-                    patient.patientId,
-                    `${patient.weeksPregnant} Weeks Pregnant`,
-                    `${patient.bloodGroup} Blood Group`,
-                    `Age ${patient.age}`,
-                  ].map((item) => (
+                    patient._id,
+                    `${patient.weeksPregnant || 0} Weeks Pregnant`,
+                    `${patient.bloodGroup || "N/A"} Blood Group`,
+                    `Age ${patient.age || "-"}`,
+                  ].map((item, index) => (
                     <div
-                      key={item}
+                      key={index}
                       className="
-                        rounded-2xl
-                        border border-slate-200
-                        bg-slate-50
-                        px-4 py-2
-                        text-sm font-medium
-                        text-slate-700
-                      "
+      rounded-2xl
+      border border-slate-200
+      bg-slate-50
+      px-4 py-2
+      text-sm font-medium
+      text-slate-700
+    "
                     >
                       {item}
                     </div>
@@ -201,7 +230,7 @@ export default function PatientDetailsPage() {
                   </p>
 
                   <h2 className="mt-2 text-3xl font-black text-slate-900">
-                    82%
+                    {patient.riskScore || 0}%
                   </h2>
 
                 </div>
