@@ -1,5 +1,6 @@
 import { connectDB } from '@/lib/db';
 import Patient from '@/models/Patient';
+import Visit from "@/models/Visit";
 import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -35,7 +36,16 @@ export async function GET(
     );
   }
 
-  return NextResponse.json(patient);
+  const visits = await Visit.find({
+    patientId: patient._id,
+  })
+    .sort({ visitDate: -1 })
+    .lean();
+
+  return NextResponse.json({
+    patient,
+    visits,
+  });
 }
 
 export async function PUT(

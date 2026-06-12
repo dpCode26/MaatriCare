@@ -21,9 +21,11 @@ export default function PatientsPage() {
 
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [todayVisits, setTodayVisits] = useState(0);
 
   useEffect(() => {
     fetchPatients();
+    fetchDashboardStats();
   }, []);
 
   async function fetchPatients() {
@@ -43,6 +45,28 @@ export default function PatientsPage() {
       setLoading(false);
     }
   }
+
+  async function fetchDashboardStats() {
+    try {
+      const res = await fetch("/api/dashboard/stats");
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      setTodayVisits(data.todayVisits);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const totalPatients = patients.length;
+
+  const highRiskPatients = patients.filter(
+    (p) =>
+      p.riskLevel === "high" ||
+      p.riskLevel === "critical"
+  ).length;
 
   return (
     <main className="min-h-screen">
@@ -95,8 +119,8 @@ export default function PatientsPage() {
 
               <p
                 className="
-                  mt-6 max-w-1xl
-                  text-[12px] leading-8
+                  mt-3 max-w-3xl
+                  text-[13px] leading-8
                   text-slate-500
                 "
               >
@@ -109,67 +133,63 @@ export default function PatientsPage() {
 
             {/* RIGHT */}
 
-            <div className="grid gap-5 sm:grid-cols-3">
+            <div className="grid gap-10 sm:grid-cols-2">
 
-              {[
-                {
-                  label: "Total Patients",
-                  value: "124",
-                  icon: Users,
-                },
-                {
-                  label: "High Risk",
-                  value: "18",
-                  icon: ShieldAlert,
-                },
-                {
-                  label: "Today's Visits",
-                  value: "09",
-                  icon: CalendarDays,
-                },
-              ].map((item, index) => {
-                const Icon = item.icon;
+              {
+                [
+                  {
+                    label: "Total Patients",
+                    value: totalPatients,
+                    icon: Users,
+                  },
+                  {
+                    label: "Today's Visits",
+                    value: todayVisits,
+                    icon: CalendarDays,
+                  },
+                ].map((item, index) => {
+                  const Icon = item.icon;
 
-                return (
-                  <div
-                    key={index}
-                    className="
+                  return (
+                    <div
+                      key={index}
+                      className="
                       rounded-[28px]
                       border border-slate-200
                       bg-slate-50
                       p-2
                       min-w-[120px]
                     "
-                  >
+                    >
 
-                    <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between">
 
-                      <div
-                        className="
+                        <div
+                          className="
                           flex h-7 w-7 items-center justify-center
                           rounded-2xl
                           bg-white
                         "
-                      >
-                        <Icon
-                          size={22}
-                          className="text-slate-700"
-                        />
+                        >
+                          <Icon
+                            size={22}
+                            className="text-slate-700"
+                          />
+                        </div>
+
+                        <h2 className="text-2xl font-black text-slate-900">
+                          {item.value}
+                        </h2>
+
                       </div>
 
-                      <h2 className="text-2xl font-black text-slate-900">
-                        {item.value}
-                      </h2>
+                      <p className="mt-5 text-sm font-medium text-slate-500">
+                        {item.label}
+                      </p>
 
                     </div>
-
-                    <p className="mt-5 text-sm font-medium text-slate-500">
-                      {item.label}
-                    </p>
-
-                  </div>
-                );
-              })}
+                  );
+                })}
 
             </div>
           </div>

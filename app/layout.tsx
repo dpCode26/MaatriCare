@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Session } from "inspector/promises";
+import { SessionProvider } from "next-auth/react";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -32,7 +34,9 @@ export default function RootLayout({
       className={cn(geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-screen bg-[#f6faf7] text-[#111827] antialiased">
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

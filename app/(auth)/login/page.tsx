@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 
 export default function LoginPage() {
+
   const router = useRouter()
   const searchParams = useSearchParams()
   const registered = searchParams.get('registered')

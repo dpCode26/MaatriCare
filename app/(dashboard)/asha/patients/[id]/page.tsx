@@ -25,6 +25,8 @@ export default function PatientDetailsPage() {
   const params = useParams();
 
   const [patient, setPatient] = useState<any>(null);
+  const [visits, setVisits] = useState<any[]>([]);
+  const latestVisit = visits?.[0];
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,7 +43,8 @@ export default function PatientDetailsPage() {
 
       const data = await res.json();
 
-      setPatient(data);
+      setPatient(data.patient);
+      setVisits(data.visits || []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -161,7 +164,7 @@ export default function PatientDetailsPage() {
 
                   <div
                     className={`rounded-full px-3 py-1 text-sm font-semibold
-    ${patient.riskLevel === "critical"
+                        ${patient.riskLevel === "critical"
                         ? "bg-red-200 text-red-700"
                         : patient.riskLevel === "high"
                           ? "bg-red-100 text-red-600"
@@ -257,7 +260,8 @@ export default function PatientDetailsPage() {
               </div>
 
               <p className="mt-4 text-sm leading-7 text-slate-500">
-                Elevated blood pressure and reduced fetal movement detected.
+                {latestVisit?.aiRiskResult?.recommendation ||
+                  "No recommendation available"}
               </p>
 
             </div>
@@ -271,7 +275,9 @@ export default function PatientDetailsPage() {
           {[
             {
               title: "EDD",
-              value: patient.edd,
+              value: patient.edd
+                ? new Date(patient.edd).toLocaleDateString("en-IN")
+                : "N/A",
               icon: CalendarDays,
             },
             {
@@ -384,48 +390,37 @@ export default function PatientDetailsPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
+              {latestVisit?.aiRiskResult?.flags?.length ? (
+                latestVisit.aiRiskResult.flags.map((risk: string) => (
+                  <div
+                    key={risk}
+                    className="
+        rounded-3xl
+        border border-red-100
+        bg-red-50/60
+        p-5
+      "
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="mt-1 h-3 w-3 rounded-full bg-red-500" />
 
-              {[
-                "High Blood Pressure",
-                "Low Hemoglobin",
-                "Reduced Fetal Movement",
-                "Swelling Observed",
-              ].map((risk) => (
-                <div
-                  key={risk}
-                  className="
-                    rounded-3xl
-                    border border-red-100
-                    bg-red-50/60
-                    p-5
-                  "
-                >
+                      <div>
+                        <h3 className="font-bold text-slate-900">
+                          {risk}
+                        </h3>
 
-                  <div className="flex items-start gap-4">
-
-                    <div
-                      className="
-                        mt-1 h-3 w-3 rounded-full
-                        bg-red-500
-                      "
-                    />
-
-                    <div>
-
-                      <h3 className="font-bold text-slate-900">
-                        {risk}
-                      </h3>
-
-                      <p className="mt-2 text-sm leading-7 text-slate-500">
-                        Requires continuous monitoring and follow-up visit.
-                      </p>
-
+                        <p className="mt-2 text-sm leading-7 text-slate-500">
+                          Detected during latest visit.
+                        </p>
+                      </div>
                     </div>
                   </div>
-
+                ))
+              ) : (
+                <div className="text-slate-500">
+                  No active risk indicators.
                 </div>
-              ))}
-
+              )}
             </div>
           </section>
 
@@ -472,31 +467,29 @@ export default function PatientDetailsPage() {
 
             <div className="space-y-4">
 
-              {[1, 2, 3].map((visit) => (
+              {visits.map((visit, index) => (
                 <div
-                  key={visit}
+                  key={visit._id}
                   className="
-                    rounded-[28px]
-                    border border-slate-100
-                    bg-slate-50/70
-                    p-5
-                    transition-all duration-300
-                    hover:border-slate-200
-                    hover:bg-white
-                  "
+      rounded-[28px]
+      border border-slate-100
+      bg-slate-50/70
+      p-5
+      transition-all duration-300
+      hover:border-slate-200
+      hover:bg-white
+    "
                 >
-
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
                     <div className="flex items-center gap-4">
-
                       <div
                         className="
-                          flex h-14 w-14 items-center justify-center
-                          rounded-2xl
-                          bg-white
-                          shadow-sm
-                        "
+            flex h-14 w-14 items-center justify-center
+            rounded-2xl
+            bg-white
+            shadow-sm
+          "
                       >
                         <CalendarDays
                           size={24}
@@ -505,37 +498,36 @@ export default function PatientDetailsPage() {
                       </div>
 
                       <div>
-
                         <h3 className="text-lg font-bold text-slate-900">
-                          Visit #{visit}
+                          Visit #{visits.length - index}
                         </h3>
 
                         <p className="mt-1 text-sm text-slate-500">
-                          14 May 2026 • ASHA Worker Visit
+                          {new Date(
+                            visit.visitDate
+                          ).toLocaleDateString()}
                         </p>
-
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-
                       <div
                         className="
-                          rounded-full
-                          bg-orange-100
-                          px-4 py-2
-                          text-sm font-semibold
-                          text-orange-600
-                        "
+            rounded-full
+            bg-orange-100
+            px-4 py-2
+            text-sm font-semibold
+            text-orange-600
+          "
                       >
-                        BP Elevated
+                        {visit.aiRiskResult?.riskLevel?.toUpperCase() ||
+                          "LOW"}
                       </div>
 
                       <ChevronRight
                         size={20}
                         className="text-slate-400"
                       />
-
                     </div>
                   </div>
                 </div>
@@ -727,9 +719,30 @@ export default function PatientDetailsPage() {
             <div className="mt-8 space-y-5">
 
               {[
-                ["Blood Pressure", "148/95"],
-                ["Hemoglobin", "9.2 g/dL"],
-                ["Fetal Heart Rate", "142 bpm"],
+                [
+                  "Blood Pressure",
+                  latestVisit
+                    ? `${latestVisit.bpSystolic}/${latestVisit.bpDiastolic}`
+                    : "N/A",
+                ],
+                [
+                  "Hemoglobin",
+                  latestVisit?.hemoglobin
+                    ? `${latestVisit.hemoglobin} g/dL`
+                    : "N/A",
+                ],
+                [
+                  "Fetal Heart Rate",
+                  latestVisit?.fetalHeartRate
+                    ? `${latestVisit.fetalHeartRate} bpm`
+                    : "N/A",
+                ],
+                [
+                  "Weight",
+                  latestVisit?.weightKg
+                    ? `${latestVisit.weightKg} kg`
+                    : "N/A",
+                ],
               ].map(([label, value]) => (
                 <div
                   key={label}

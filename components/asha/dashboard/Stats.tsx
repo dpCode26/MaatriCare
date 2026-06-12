@@ -1,4 +1,35 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 export default function Stats() {
+  const [stats, setStats] = useState({
+  totalPatients: 0,
+  highRiskPatients: 0,
+  todayVisits: 0,
+});
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  async function loadStats() {
+    try {
+      const res = await fetch("/api/patients");
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch patients");
+      }
+
+      const data = await res.json();
+
+      setStats(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
   return (
     <div className="bg-white rounded-3xl shadow-sm p-6 relative overflow-hidden min-h-[200px]">
 
@@ -7,7 +38,7 @@ export default function Stats() {
       </h2>
 
       <h1 className="text-6xl font-bold mt-3 text-[#1f2a44]">
-        237
+        {stats.totalPatients}
       </h1>
 
       <p className="text-gray-500 mt-2">

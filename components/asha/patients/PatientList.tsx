@@ -1,31 +1,56 @@
+"use client";
 import { Search } from "lucide-react";
 import PatientCard from "./PatientCard";
 import RiskBadge from "@/components/shared/RiskBadge";
-
-const patients = [
-  {
-    name: "Matri",
-    village: "Apamai Mah",
-    risk: "high",
-  },
-  {
-    name: "Suman Devi",
-    village: "Mithapur",
-    risk: "medium",
-  },
-  {
-    name: "Radha Kumari",
-    village: "Patna",
-    risk: "low",
-  },
-  {
-    name: "Neha Singh",
-    village: "Nalanda",
-    risk: "low",
-  },
-];
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function PatientList() {
+
+  const [patients, setPatients] = useState<[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const filteredPatients = patients.filter((patient: any) =>
+    patient.userId?.name
+      ?.toLowerCase()
+      .includes(search.toLowerCase()) ||
+    patient.village
+      ?.toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  async function loadPatients() {
+    try {
+      const res = await fetch("/api/patients");
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch patients");
+      }
+
+      const data = await res.json();
+
+      setPatients(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-3xl shadow-sm p-4">
+        Loading patients...
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-3xl shadow-sm p-4 h-full min-h-[400px] overflow-y-auto">
 
@@ -35,9 +60,18 @@ export default function PatientList() {
           Patient List
         </h2>
 
-        <button className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium">
+        <Link
+          href="/asha/patients"
+          className="
+    px-4 py-2
+    rounded-xl
+    border border-gray-200
+    text-sm font-medium
+    inline-flex items-center
+  "
+        >
           View All
-        </button>
+        </Link>
 
       </div>
 
@@ -59,6 +93,8 @@ export default function PatientList() {
         <input
           type="text"
           placeholder="Search patient"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           className="w-full h-9 rounded-2xl border border-gray-200 pl-12 pr-4 outline-none focus:ring-2 focus:ring-green-300"
         />
 
@@ -69,16 +105,21 @@ export default function PatientList() {
       </h3>
 
       <div className="mt-2">
-
-        {patients.map((patient, index) => (
-          <PatientCard
-            key={index}
-            name={patient.name}
-            village={patient.village}
-            risk={patient.risk as "low" | "medium" | "high"}
-          />
-        ))}
-
+        {filteredPatients.length === 0 ? (
+          <p className="mt-4 text-sm text-gray-500">
+            No patients found.
+          </p>
+        ) : (
+          filteredPatients.slice(0, 5).map((patient: any) => (
+            <PatientCard
+              key={patient._id}
+              id={patient._id}
+              name={patient.userId?.name || "Unknown"}
+              village={patient.village || "N/A"}
+              risk={patient.riskLevel}
+            />
+          ))
+        )}
       </div>
 
     </div>
