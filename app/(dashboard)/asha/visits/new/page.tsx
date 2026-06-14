@@ -1,5 +1,6 @@
 //Log visit form
 "use client";
+import { useState } from "react";
 
 import {
   CalendarDays,
@@ -10,9 +11,97 @@ import {
 } from "lucide-react";
 
 export default function LogVisitPage() {
+  const [formData, setFormData] = useState({
+    patientId: "",
+
+    weightKg: "",
+    bpSystolic: "",
+    bpDiastolic: "",
+    hemoglobin: "",
+    fundalHeight: "",
+    fetalHeartRate: "",
+
+    fetalMovement: "normal",
+    vomiting: "none",
+    urineAlbumin: "negative",
+
+    swellingFeet: false,
+    swellingFace: false,
+    bleeding: false,
+
+    notes: "",
+    nextVisitDate: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement |
+      HTMLSelectElement |
+      HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCheckbox = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch(
+        "/api/visits",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify(
+            formData
+          ),
+        }
+      );
+
+      const data =
+        await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error
+        );
+      }
+
+      alert(
+        "Visit saved successfully"
+      );
+
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
   return (
     <main className="mx-auto max-w-7xl space-y-6">
-        <div className="relative overflow-hidden rounded-[28px] border border-[#f1d6d1] bg-gradient-to-br from-[#e76f7a] via-[#ec8a93] to-[#f4a261] p-6 md:p-8 shadow-sm">
+      <div className="relative overflow-hidden rounded-[28px] border border-[#f1d6d1] bg-gradient-to-br from-[#e76f7a] via-[#ec8a93] to-[#f4a261] p-6 md:p-8 shadow-sm">
 
         <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
 
@@ -26,13 +115,13 @@ export default function LogVisitPage() {
             </p>
 
             <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl">
-             Patient Visit
+              Patient Visit
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/90 md:text-base">
               Record maternal vitals, pregnancy observations,
-          lab reports, and AI-assisted risk analysis
-          during every village healthcare visit.
+              lab reports, and AI-assisted risk analysis
+              during every village healthcare visit.
             </p>
           </div>
 
@@ -94,6 +183,13 @@ export default function LogVisitPage() {
 
                 <input
                   type="text"
+                  value={formData.patientId}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      patientId: e.target.value,
+                    })
+                  }
                   placeholder="Enter patient ID"
                   className="
                     h-12 w-full rounded-2xl
@@ -115,6 +211,13 @@ export default function LogVisitPage() {
 
                 <input
                   type="date"
+                  value={formData.nextVisitDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      nextVisitDate: e.target.value,
+                    })
+                  }
                   className="
                     h-12 w-full rounded-2xl
                     border border-[var(--border)]
@@ -166,24 +269,16 @@ export default function LogVisitPage() {
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label>Weight (kg)</label>
 
-              {[
-                "Weight (kg)",
-                "BP Systolic",
-                "BP Diastolic",
-                "Hemoglobin",
-                "Fundal Height",
-                "Fetal Heart Rate",
-              ].map((item) => (
-                <div key={item}>
-                  <label className="mb-2 block text-sm font-medium text-[var(--foreground)]">
-                    {item}
-                  </label>
-
-                  <input
-                    type="number"
-                    placeholder={`Enter ${item}`}
-                    className="
+                <input
+                  type="number"
+                  name="weightKg"
+                  value={formData.weightKg}
+                  onChange={handleChange}
+                  placeholder="Enter Weight"
+                  className="
                       h-12 w-full rounded-2xl
                       border border-[var(--border)]
                       bg-white px-4
@@ -193,10 +288,118 @@ export default function LogVisitPage() {
                       focus:ring-4
                       focus:ring-[rgba(231,111,122,0.15)]
                     "
-                  />
-                </div>
-              ))}
+                />
+              </div>
 
+              <div>
+                <label>BP Systolic</label>
+
+                <input
+                  type="number"
+                  name="bpSystolic"
+                  value={formData.bpSystolic}
+                  onChange={handleChange}
+                  placeholder="Enter BP Systolic"
+                  className="
+                      h-12 w-full rounded-2xl
+                      border border-[var(--border)]
+                      bg-white px-4
+                      text-sm
+                      transition-all duration-200
+                      focus:border-[var(--primary)]
+                      focus:ring-4
+                      focus:ring-[rgba(231,111,122,0.15)]
+                    "
+                />
+              </div>
+
+              <div>
+                <label>BP Diastolic</label>
+
+                <input
+                  type="number"
+                  name="bpDiastolic"
+                  value={formData.bpDiastolic}
+                  onChange={handleChange}
+                  placeholder="Enter BP Diastolic"
+                  className="
+                      h-12 w-full rounded-2xl
+                      border border-[var(--border)]
+                      bg-white px-4
+                      text-sm
+                      transition-all duration-200
+                      focus:border-[var(--primary)]
+                      focus:ring-4
+                      focus:ring-[rgba(231,111,122,0.15)]
+                    "
+                />
+              </div>
+
+              <div>
+                <label>Hemoglobin</label>
+
+                <input
+                  type="number"
+                  name="hemoglobin"
+                  value={formData.hemoglobin}
+                  onChange={handleChange}
+                  placeholder="Enter Hemoglobin"
+                  className="
+                      h-12 w-full rounded-2xl
+                      border border-[var(--border)]
+                      bg-white px-4
+                      text-sm
+                      transition-all duration-200
+                      focus:border-[var(--primary)]
+                      focus:ring-4
+                      focus:ring-[rgba(231,111,122,0.15)]
+                    "
+                />
+              </div>
+
+              <div>
+                <label>Fundal Height</label>
+
+                <input
+                  type="number"
+                  name="fundalHeight"
+                  value={formData.fundalHeight}
+                  onChange={handleChange}
+                  placeholder="Enter Fundal Height"
+                  className="
+                      h-12 w-full rounded-2xl
+                      border border-[var(--border)]
+                      bg-white px-4
+                      text-sm
+                      transition-all duration-200
+                      focus:border-[var(--primary)]
+                      focus:ring-4
+                      focus:ring-[rgba(231,111,122,0.15)]
+                    "
+                />
+              </div>
+
+              <div>
+                <label>Fetal Heart Rate</label>
+
+                <input
+                  type="number"
+                  name="fetalHeartRate"
+                  value={formData.fetalHeartRate}
+                  onChange={handleChange}
+                  placeholder="Enter Fetal Heart Rate"
+                  className="
+                      h-12 w-full rounded-2xl
+                      border border-[var(--border)]
+                      bg-white px-4
+                      text-sm
+                      transition-all duration-200
+                      focus:border-[var(--primary)]
+                      focus:ring-4
+                      focus:ring-[rgba(231,111,122,0.15)]
+                    "
+                />
+              </div>
             </div>
           </section>
 
@@ -244,6 +447,9 @@ export default function LogVisitPage() {
                 </label>
 
                 <select
+                  name="fetalMovement"
+                  value={formData.fetalMovement}
+                  onChange={handleChange}
                   className="
                     h-12 w-full rounded-2xl
                     border border-[var(--border)]
@@ -269,6 +475,9 @@ export default function LogVisitPage() {
                 </label>
 
                 <select
+                  name="vomiting"
+                  value={formData.vomiting}
+                  onChange={handleChange}
                   className="
                     h-12 w-full rounded-2xl
                     border border-[var(--border)]
@@ -293,6 +502,9 @@ export default function LogVisitPage() {
                 </label>
 
                 <select
+                  name="urineAlbumin"
+                  value={formData.urineAlbumin}
+                  onChange={handleChange}
                   className="
                     h-12 w-full rounded-2xl
                     border border-[var(--border)]
@@ -315,33 +527,56 @@ export default function LogVisitPage() {
             {/* TOGGLES */}
 
             <div className="mt-8 grid gap-4 md:grid-cols-3">
-
-              {[
-                "Swelling Feet",
-                "Swelling Face",
-                "Bleeding",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="
+              <label className="flex items-center gap-2">
+                <input
+                type="checkbox"
+                name="swellingFeet"
+                checked={formData.swellingFeet}
+                onChange={handleCheckbox}
+                className="
                     flex items-center justify-between
                     rounded-2xl
                     border border-[var(--border)]
                     bg-[var(--muted)]
                     px-5 py-4
                   "
-                >
-                  <span className="font-medium text-[var(--foreground)]">
-                    {item}
-                  </span>
+              />
+              SwellingFeet
+              </label>
 
-                  <input
-                    type="checkbox"
-                    className="h-5 w-5 accent-[var(--primary)]"
-                  />
-                </div>
-              ))}
+              <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="swellingFace"
+                checked={formData.swellingFace}
+                onChange={handleCheckbox}
+                className="
+                    flex items-center justify-between
+                    rounded-2xl
+                    border border-[var(--border)]
+                    bg-[var(--muted)]
+                    px-5 py-4
+                  "
+              />
+              SwellingFace
+              </label>
 
+              <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="bleeding"
+                checked={formData.bleeding}
+                onChange={handleCheckbox}
+                className="
+                    flex items-center justify-between
+                    rounded-2xl
+                    border border-[var(--border)]
+                    bg-[var(--muted)]
+                    px-5 py-4
+                  "
+              />
+              Bleeding
+              </label>
             </div>
 
           </section>
@@ -361,6 +596,9 @@ export default function LogVisitPage() {
 
             <textarea
               rows={5}
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
               placeholder="Add doctor notes, symptoms, concerns..."
               className="
                 w-full rounded-3xl
@@ -372,7 +610,6 @@ export default function LogVisitPage() {
                 focus:ring-[rgba(231,111,122,0.15)]
               "
             />
-
           </section>
         </div>
 
@@ -472,6 +709,7 @@ export default function LogVisitPage() {
 
           <button
             type="submit"
+            onClick={handleSubmit}
             className="
               h-14 w-full rounded-2xl
               bg-gradient-to-r

@@ -91,8 +91,9 @@ export default function PatientDetailsPage() {
           Back To Patients
         </Link>
 
-        <button
-          className="
+          <Link
+            href={`/asha/patients/${patient._id}/log-visit`}
+            className="
             inline-flex items-center gap-2
             rounded-2xl
             bg-slate-900
@@ -103,10 +104,10 @@ export default function PatientDetailsPage() {
             transition-all duration-300
             hover:scale-[1.02]
           "
-        >
+          >
           <Plus size={18} />
           Log Visit
-        </button>
+          </Link>
       </div>
 
       <section
