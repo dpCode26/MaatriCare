@@ -21,14 +21,21 @@ export default function Stats() {
         throw new Error("Failed to fetch patients");
       }
 
-      const data = await res.json();
+      const patients = await res.json();
 
-      setStats(data);
+      setStats({
+      totalPatients: patients.length,
+
+      highRiskPatients: patients.filter(
+        (p) => p.riskLevel === "High"
+      ).length,
+
+      todayVisits: 0,
+    });
     } catch (error) {
       console.error(error);
     }
   }
-
 
   return (
     <div className="bg-white rounded-3xl shadow-sm p-6 relative overflow-hidden min-h-[200px]">

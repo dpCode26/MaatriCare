@@ -8,6 +8,7 @@ export default function RiskBadge({ level }: RiskBadgeProps) {
     low: "bg-green-200 text-green-900",
     medium: "bg-yellow-200 text-yellow-900",
     high: "bg-red-200 text-red-900",
+    critical: "bg-red-200 text-red-900",
   };
 
   return (

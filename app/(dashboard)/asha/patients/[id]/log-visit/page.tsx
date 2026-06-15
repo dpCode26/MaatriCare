@@ -21,6 +21,7 @@ type Patient = {
 };
 
 export default function LogVisitPage() {
+
   const params = useParams();
   const router = useRouter();
 
@@ -164,6 +165,40 @@ export default function LogVisitPage() {
     try {
       setSaving(true);
 
+      let uploadedUrl = "";
+
+      if (file) {
+        const uploadForm =
+          new FormData();
+
+        uploadForm.append(
+          "file",
+          file
+        );
+
+        const uploadRes =
+          await fetch(
+            "/api/upload",
+            {
+              method: "POST",
+              body: uploadForm,
+            }
+          );
+
+        const uploadData =
+          await uploadRes.json();
+
+        if (!uploadRes.ok) {
+          throw new Error(
+            uploadData.error ||
+            "Upload failed"
+          );
+        }
+
+        uploadedUrl =
+          uploadData.url;
+      }
+
       const res = await fetch(
         "/api/visits",
         {
@@ -175,6 +210,12 @@ export default function LogVisitPage() {
           body: JSON.stringify({
             patientId,
             ...formData,
+
+            labReportUrl:
+              uploadedUrl,
+
+            labReportType:
+              "medical_report",
           }),
         }
       );
@@ -453,6 +494,33 @@ export default function LogVisitPage() {
               placeholder="Add observations..."
               className="w-full rounded-3xl border p-5"
             />
+
+          </section>
+
+          {/* LAB REPORT */}
+
+          <section className="rounded-[32px] border bg-white/90 p-7">
+
+            <h2 className="mb-5 text-2xl font-bold">
+              Lab Report Upload
+            </h2>
+
+            <input
+              type="file"
+              accept=".pdf,image/*"
+              onChange={(e) =>
+                setFile(
+                  e.target.files?.[0] ?? null
+                )
+              }
+              className="w-full rounded-2xl border p-4"
+            />
+
+            {file && (
+              <p className="mt-3 text-sm text-green-600">
+                Selected: {file.name}
+              </p>
+            )}
 
           </section>
 

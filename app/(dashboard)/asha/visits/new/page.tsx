@@ -11,6 +11,10 @@ import {
 } from "lucide-react";
 
 export default function LogVisitPage() {
+  const [file, setFile] = useState<File | null>(null);
+  const [reportUrl, setReportUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+
   const [formData, setFormData] = useState({
     patientId: "",
 
@@ -59,26 +63,61 @@ export default function LogVisitPage() {
     }));
   };
 
+  const uploadToCloudinary = async () => {
+    if (!file) return "";
+
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+
+      formData.append("file", file);
+      formData.append(
+        "upload_preset",
+        process.env.CLOUDINARY_UPLOAD_PRESET!
+      );
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/auto/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await res.json();
+
+      return data.secure_url;
+    } catch (err) {
+      console.error(err);
+      alert("File upload failed");
+      return "";
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (
     e: React.FormEvent
   ) => {
     e.preventDefault();
 
     try {
+      const uploadedUrl = await uploadToCloudinary();
+
       const res = await fetch(
         "/api/visits",
         {
           method: "POST",
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(
-            formData
-          ),
+          body: JSON.stringify({
+            ...formData,
+            reportUrl: uploadedUrl,
+          }),
         }
       );
-
       const data =
         await res.json();
 
@@ -529,53 +568,53 @@ export default function LogVisitPage() {
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               <label className="flex items-center gap-2">
                 <input
-                type="checkbox"
-                name="swellingFeet"
-                checked={formData.swellingFeet}
-                onChange={handleCheckbox}
-                className="
+                  type="checkbox"
+                  name="swellingFeet"
+                  checked={formData.swellingFeet}
+                  onChange={handleCheckbox}
+                  className="
                     flex items-center justify-between
                     rounded-2xl
                     border border-[var(--border)]
                     bg-[var(--muted)]
                     px-5 py-4
                   "
-              />
-              SwellingFeet
+                />
+                SwellingFeet
               </label>
 
               <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="swellingFace"
-                checked={formData.swellingFace}
-                onChange={handleCheckbox}
-                className="
+                <input
+                  type="checkbox"
+                  name="swellingFace"
+                  checked={formData.swellingFace}
+                  onChange={handleCheckbox}
+                  className="
                     flex items-center justify-between
                     rounded-2xl
                     border border-[var(--border)]
                     bg-[var(--muted)]
                     px-5 py-4
                   "
-              />
-              SwellingFace
+                />
+                SwellingFace
               </label>
 
               <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="bleeding"
-                checked={formData.bleeding}
-                onChange={handleCheckbox}
-                className="
+                <input
+                  type="checkbox"
+                  name="bleeding"
+                  checked={formData.bleeding}
+                  onChange={handleCheckbox}
+                  className="
                     flex items-center justify-between
                     rounded-2xl
                     border border-[var(--border)]
                     bg-[var(--muted)]
                     px-5 py-4
                   "
-              />
-              Bleeding
+                />
+                Bleeding
               </label>
             </div>
 
@@ -651,11 +690,22 @@ export default function LogVisitPage() {
                 Upload Lab Report
               </h3>
 
-              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                PDF, JPG or PNG
-              </p>
+              {file && (
+                <p className="mt-3 text-sm text-green-600 font-medium">
+                  Selected: {file.name}
+                </p>
+              )}
 
-              <input type="file" hidden />
+              <input
+                type="file"
+                hidden
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setFile(e.target.files[0]);
+                  }
+                }}
+              />
             </label>
           </section>
 
@@ -722,7 +772,9 @@ export default function LogVisitPage() {
               hover:shadow-[0_18px_50px_rgba(231,111,122,0.35)]
             "
           >
-            Save Visit Record
+            {uploading
+              ? "Uploading Report..."
+              : "Save Visit Record"}
           </button>
         </div>
       </form>
