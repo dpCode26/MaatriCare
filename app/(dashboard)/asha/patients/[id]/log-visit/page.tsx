@@ -232,7 +232,7 @@ export default function LogVisitPage() {
       alert("Visit saved");
 
       router.push(
-        `/asha/patients/${patientId}/visits`
+        `/asha/patients/${patientId}/log-visit`
       );
     } catch (err) {
       console.error(err);

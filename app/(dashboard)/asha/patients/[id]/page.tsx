@@ -68,6 +68,15 @@ export default function PatientDetailsPage() {
     );
   }
 
+  const riskScore =
+    latestVisit?.aiRiskResult?.riskLevel === "critical"
+      ? 95
+      : latestVisit?.aiRiskResult?.riskLevel === "high"
+        ? 75
+        : latestVisit?.aiRiskResult?.riskLevel === "medium"
+          ? 50
+          : 20;
+
   return (
     <main className="min-h-screen p-2">
 
@@ -91,9 +100,9 @@ export default function PatientDetailsPage() {
           Back To Patients
         </Link>
 
-          <Link
-            href={`/asha/patients/${patient._id}/log-visit`}
-            className="
+        <Link
+          href={`/asha/patients/${patient._id}/log-visit`}
+          className="
             inline-flex items-center gap-2
             rounded-2xl
             bg-slate-900
@@ -104,10 +113,10 @@ export default function PatientDetailsPage() {
             transition-all duration-300
             hover:scale-[1.02]
           "
-          >
+        >
           <Plus size={18} />
           Log Visit
-          </Link>
+        </Link>
       </div>
 
       <section
@@ -232,9 +241,8 @@ export default function PatientDetailsPage() {
                   <p className="text-sm text-slate-500">
                     AI Risk Score
                   </p>
-
                   <h2 className="mt-2 text-3xl font-black text-slate-900">
-                    {patient.riskScore || 0}%
+                    {riskScore}%
                   </h2>
 
                 </div>
@@ -257,7 +265,34 @@ export default function PatientDetailsPage() {
               <div className="mt-5 h-3 overflow-hidden rounded-full bg-red-100">
 
                 <div className="h-full w-[72%] rounded-full bg-red-500" />
+                <div
+                  className={`
+    h-full rounded-full
+    ${riskScore >= 75
+                      ? "bg-red-500"
+                      : riskScore >= 50
+                        ? "bg-orange-500"
+                        : "bg-green-500"
+                    }
+  `}
+                  style={{ width: `${riskScore}%` }}
+                />
 
+                <p
+                  className={`
+    mt-1 text-sm font-semibold
+    ${latestVisit?.aiRiskResult?.riskLevel === "critical"
+                      ? "text-red-600"
+                      : latestVisit?.aiRiskResult?.riskLevel === "high"
+                        ? "text-orange-600"
+                        : latestVisit?.aiRiskResult?.riskLevel === "medium"
+                          ? "text-yellow-600"
+                          : "text-green-600"
+                    }
+  `}
+                >
+                  {latestVisit?.aiRiskResult?.riskLevel?.toUpperCase() || "LOW"}
+                </p>
               </div>
 
               <p className="mt-4 text-sm leading-7 text-slate-500">
@@ -385,7 +420,9 @@ export default function PatientDetailsPage() {
                   text-red-600
                 "
               >
-                High Attention
+                {latestVisit?.aiRiskResult?.escalate
+  ? "Immediate Attention"
+  : "Routine Monitoring"}
               </div>
 
             </div>

@@ -1,49 +1,51 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import {
   AlertTriangle,
   BellRing,
   MapPinned,
 } from "lucide-react";
 
-const alerts = [
-  {
-    id: 1,
-    patient: "Aarti Gupta",
-    condition: "Severe Pre-eclampsia",
-    time: "2m ago",
-    risk: "Red",
-    message:
-      "Increased high-risk cases in eastern Patna; common severe pre-eclampsia.",
-    color: "red",
-  },
-  {
-    id: 2,
-    patient: "Aarata Sharma",
-    condition: "Critical Kansipaa",
-    time: "2m ago",
-    risk: "Critical",
-    message:
-      "Patient condition worsening with low hemoglobin and hypertension.",
-    color: "orange",
-  },
-  {
-    id: 3,
-    patient: "Minti Gupta",
-    condition: "Severe Pre-eclampsia",
-    time: "3m ago",
-    risk: "Red",
-    message:
-      "Increased hypertension patterns detected in rural areas.",
-    color: "green",
-  },
-];
+export default function DoctorPage() {
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function DoctorDashboardPage() {
+  useEffect(() => {
+    async function fetchAlerts() {
+      try {
+        const res = await fetch("/api/alerts");
+        const data = await res.json();
+
+        setAlerts(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchAlerts();
+  }, []);
+
+  const getRiskColor = (risk: string) => {
+    switch (risk?.toLowerCase()) {
+      case "critical":
+        return "red";
+
+      case "high":
+        return "orange";
+
+      default:
+        return "green";
+    }
+  };
+
   return (
-    <div className="min-h-screen p-2 md:p-6 overflow-y-auto">
+    <div className="min-h-screen overflow-y-auto p-2 md:p-6">
       <div className="space-y-5">
-        
+
         <div>
           <h1 className="text-3xl font-bold text-slate-900">
             Alerts Panel
@@ -54,13 +56,12 @@ export default function DoctorDashboardPage() {
           </p>
         </div>
 
-        {/* MAIN GRID */}
         <div className="grid gap-5 xl:grid-cols-2">
 
           {/* ALERTS SECTION */}
+
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            
-            {/* HEADER */}
+
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold uppercase tracking-wide text-slate-800">
@@ -74,91 +75,112 @@ export default function DoctorDashboardPage() {
 
               <div className="flex items-center gap-2 text-sm text-emerald-600">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-
-                <span>Socket.io Live</span>
+                <span>Live Monitoring</span>
               </div>
             </div>
 
-            {/* ALERT LIST */}
-            <div className="space-y-3">
-              {alerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className={`rounded-2xl border-l-4 p-4 shadow-sm transition-all hover:shadow-md
-                    ${
-                      alert.color === "red"
-                        ? "border-red-500 bg-red-50"
-                        : alert.color === "orange"
-                        ? "border-orange-500 bg-orange-50"
-                        : "border-emerald-500 bg-emerald-50"
-                    }
-                  `}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    
-                    {/* LEFT */}
-                    <div className="flex gap-3">
-                      
-                      <div
-                        className={`mt-1 flex h-10 w-10 items-center justify-center rounded-full
-                          ${
-                            alert.color === "red"
-                              ? "bg-red-100 text-red-600"
-                              : alert.color === "orange"
-                              ? "bg-orange-100 text-orange-600"
-                              : "bg-emerald-100 text-emerald-600"
-                          }
-                        `}
-                      >
-                        <AlertTriangle className="h-5 w-5" />
-                      </div>
+            {loading ? (
+              <div className="py-10 text-center text-slate-500">
+                Loading alerts...
+              </div>
+            ) : alerts.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 p-6 text-center text-slate-500">
+                No active alerts found.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {alerts.map((alert: any) => {
+                  const color = getRiskColor(
+                    alert.aiRiskResult?.riskLevel
+                  );
 
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-semibold text-slate-900">
-                            {alert.patient}
-                          </h3>
+                  return (
+                    <div
+                      key={alert._id}
+                      className={`rounded-2xl border-l-4 p-4 shadow-sm transition-all hover:shadow-md
+                      ${
+                        color === "red"
+                          ? "border-red-500 bg-red-50"
+                          : color === "orange"
+                          ? "border-orange-500 bg-orange-50"
+                          : "border-emerald-500 bg-emerald-50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
 
-                          <span className="text-slate-500">•</span>
+                        <div className="flex gap-3">
 
-                          <p className="font-medium text-slate-700">
-                            {alert.condition}
-                          </p>
+                          <div
+                            className={`mt-1 flex h-10 w-10 items-center justify-center rounded-full
+                            ${
+                              color === "red"
+                                ? "bg-red-100 text-red-600"
+                                : color === "orange"
+                                ? "bg-orange-100 text-orange-600"
+                                : "bg-emerald-100 text-emerald-600"
+                            }`}
+                          >
+                            <AlertTriangle className="h-5 w-5" />
+                          </div>
 
-                          <span className="text-sm text-slate-500">
-                            {alert.time}
-                          </span>
+                          <div>
+
+                            <div className="flex flex-wrap items-center gap-2">
+
+                              <h3 className="font-semibold text-slate-900">
+                                {alert.patientId?.userId?.name ||
+                                  "Unknown Patient"}
+                              </h3>
+
+                              <span className="text-slate-500">•</span>
+
+                              <p className="font-medium text-slate-700">
+                                {alert.aiRiskResult?.flags?.[0] ||
+                                  "Risk Detected"}
+                              </p>
+
+                              <span className="text-sm text-slate-500">
+                                {new Date(
+                                  alert.createdAt
+                                ).toLocaleString()}
+                              </span>
+
+                            </div>
+
+                            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                              {alert.aiRiskResult?.recommendation ||
+                                "No recommendation available."}
+                            </p>
+
+                          </div>
                         </div>
 
-                        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                          {alert.message}
-                        </p>
+                        <div
+                          className={`rounded-full px-3 py-1 text-xs font-semibold
+                          ${
+                            color === "red"
+                              ? "bg-red-100 text-red-700"
+                              : color === "orange"
+                              ? "bg-orange-100 text-orange-700"
+                              : "bg-emerald-100 text-emerald-700"
+                          }`}
+                        >
+                          {alert.aiRiskResult?.riskLevel?.toUpperCase() ||
+                            "LOW"}
+                        </div>
+
                       </div>
                     </div>
-
-                    {/* BADGE */}
-                    <div
-                      className={`rounded-full px-3 py-1 text-xs font-semibold
-                        ${
-                          alert.color === "red"
-                            ? "bg-red-100 text-red-700"
-                            : alert.color === "orange"
-                            ? "bg-orange-100 text-orange-700"
-                            : "bg-emerald-100 text-emerald-700"
-                        }
-                      `}
-                    >
-                      {alert.risk}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
+          {/* DISTRICT RISK SECTION STARTS HERE */}
           {/* DISTRICT RISK SECTION */}
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            
+
             {/* HEADER */}
             <div className="mb-5 flex items-center justify-between">
               <div>

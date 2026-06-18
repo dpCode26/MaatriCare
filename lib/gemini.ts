@@ -46,6 +46,7 @@ interface DistrictStats {
 }
 
 //  Risk Analyzer — called after every visit
+console.log("AI ANALYSIS STARTED");
 
 export async function analyzePregnancyRisk(
   visitData: VisitData,
