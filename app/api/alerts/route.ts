@@ -1,26 +1,37 @@
-import { connectDB } from '@/lib/db';
-import Alert from '@/models/Alert';
-import { auth } from '@/lib/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import {connectDB} from "@/lib/db";
+
+import Visit from "@/models/Visit";
+import "@/models/Patient";
+import "@/models/User";
+
+import mongoose from "mongoose";
+
+console.log("MODELS:", mongoose.modelNames());
 
 export async function GET() {
-  await connectDB();
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    await connectDB();
 
-  const alerts = await Alert.find({ doctorId: session.user.id })
-    .populate('patientId', 'userId riskLevel')
-    .sort({ createdAt: -1 });
+    const alerts = await Visit.find({
+      "aiRiskResult.escalate": true,
+    })
+      .populate({
+        path: "patientId",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      })
+      .sort({ createdAt: -1 });
 
-  return NextResponse.json(alerts);
-}
+    return NextResponse.json(alerts);
+  } catch (error) {
+    console.error(error);
 
-export async function POST(req: NextRequest) {
-  await connectDB();
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const body = await req.json();
-  const alert = await Alert.create(body);
-  return NextResponse.json(alert, { status: 201 });
+    return NextResponse.json(
+      { error: "Failed to load alerts" },
+      { status: 500 }
+    );
+  }
 }

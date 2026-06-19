@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 import {
   AlertTriangle,
@@ -17,8 +18,9 @@ export default function DoctorPage() {
       try {
         const res = await fetch("/api/alerts");
         const data = await res.json();
+        console.log("ALERT API RESPONSE:", data);
+        setAlerts(Array.isArray(data) ? data : []);
 
-        setAlerts(data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -44,7 +46,7 @@ export default function DoctorPage() {
 
   return (
     <div className="min-h-screen overflow-y-auto p-2 md:p-6">
-      <div className="space-y-5">
+      <div className="space-y-4">
 
         <div>
           <h1 className="text-3xl font-bold text-slate-900">
@@ -94,17 +96,20 @@ export default function DoctorPage() {
                     alert.aiRiskResult?.riskLevel
                   );
 
+                  const risk =
+                    alert.aiRiskResult?.riskLevel?.toUpperCase() ||
+                    "LOW";
+
                   return (
                     <div
                       key={alert._id}
                       className={`rounded-2xl border-l-4 p-4 shadow-sm transition-all hover:shadow-md
-                      ${
-                        color === "red"
+                      ${color === "red"
                           ? "border-red-500 bg-red-50"
                           : color === "orange"
-                          ? "border-orange-500 bg-orange-50"
-                          : "border-emerald-500 bg-emerald-50"
-                      }`}
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-emerald-500 bg-emerald-50"
+                        }`}
                     >
                       <div className="flex items-start justify-between gap-4">
 
@@ -112,13 +117,12 @@ export default function DoctorPage() {
 
                           <div
                             className={`mt-1 flex h-10 w-10 items-center justify-center rounded-full
-                            ${
-                              color === "red"
+                            ${color === "red"
                                 ? "bg-red-100 text-red-600"
                                 : color === "orange"
-                                ? "bg-orange-100 text-orange-600"
-                                : "bg-emerald-100 text-emerald-600"
-                            }`}
+                                  ? "bg-orange-100 text-orange-600"
+                                  : "bg-emerald-100 text-emerald-600"
+                              }`}
                           >
                             <AlertTriangle className="h-5 w-5" />
                           </div>
@@ -134,10 +138,16 @@ export default function DoctorPage() {
 
                               <span className="text-slate-500">•</span>
 
-                              <p className="font-medium text-slate-700">
-                                {alert.aiRiskResult?.flags?.[0] ||
-                                  "Risk Detected"}
-                              </p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {alert.aiRiskResult?.flags?.map((flag: string) => (
+                                  <span
+                                    key={flag}
+                                    className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700"
+                                  >
+                                    {flag}
+                                  </span>
+                                ))}
+                              </div>
 
                               <span className="text-sm text-slate-500">
                                 {new Date(
@@ -152,18 +162,31 @@ export default function DoctorPage() {
                                 "No recommendation available."}
                             </p>
 
+                            <div className="mt-4 flex gap-2">
+                              <Link href={`/doctor/patients/${alert.patientId?._id}`}>
+                                <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">
+                                  View Patient
+                                </button>
+                              </Link>
+
+                              <button
+                                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium"
+                              >
+                                Mark Reviewed
+                              </button>
+                            </div>
+
                           </div>
                         </div>
 
                         <div
                           className={`rounded-full px-3 py-1 text-xs font-semibold
-                          ${
-                            color === "red"
+                          ${color === "red"
                               ? "bg-red-100 text-red-700"
                               : color === "orange"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-emerald-100 text-emerald-700"
-                          }`}
+                                ? "bg-orange-100 text-orange-700"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
                         >
                           {alert.aiRiskResult?.riskLevel?.toUpperCase() ||
                             "LOW"}
@@ -176,8 +199,6 @@ export default function DoctorPage() {
               </div>
             )}
           </div>
-
-          {/* DISTRICT RISK SECTION STARTS HERE */}
           {/* DISTRICT RISK SECTION */}
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
 
