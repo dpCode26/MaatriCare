@@ -28,6 +28,7 @@ export default function PatientDetailsPage() {
     const [visits, setVisits] = useState<any[]>([]);
     const latestVisit = visits?.[0];
     const [loading, setLoading] = useState(true);
+    const [selectedVisit, setSelectedVisit] = useState<any>(null);
 
     useEffect(() => {
         loadPatient();
@@ -100,13 +101,13 @@ export default function PatientDetailsPage() {
                     Back To Patients
                 </Link>
 
-                <div className="flex gap-3">
+                {/* <div className="flex gap-3">
 
                     <button
                         className="
       rounded-2xl
-      bg-red-600
-      px-5 py-3
+      bg-red-500
+      px-2 py-2
       text-white
       font-semibold
     "
@@ -114,19 +115,13 @@ export default function PatientDetailsPage() {
                         Refer Patient
                     </button>
 
-                    <button
-                        className="
-      rounded-2xl
-      bg-emerald-600
-      px-5 py-3
-      text-white
-      font-semibold
-    "
-                    >
-                        Mark Reviewed
-                    </button>
+                   <button
+  className="rounded-xl bg-[#2a9d8f] px-4 py-2 font-semibold text-white hover:bg-[#23867a]"
+>
+  Mark Reviewed
+</button> 
 
-                </div>
+                </div> */}
             </div>
 
             <section
@@ -518,15 +513,18 @@ export default function PatientDetailsPage() {
                             {visits.map((visit, index) => (
                                 <div
                                     key={visit._id}
+                                    onClick={() => setSelectedVisit(visit)}
                                     className="
-      rounded-[28px]
-      border border-slate-100
-      bg-slate-50/70
-      p-5
-      transition-all duration-300
-      hover:border-slate-200
-      hover:bg-white
-    "
+    cursor-pointer
+    rounded-[28px]
+    border border-slate-100
+    bg-slate-50/70
+    p-5
+    transition-all duration-300
+    hover:border-slate-200
+    hover:bg-white
+    hover:shadow-md
+  "
                                 >
                                     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
@@ -813,6 +811,90 @@ export default function PatientDetailsPage() {
                     </section>
                 </div>
             </section>
+            {selectedVisit && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    onClick={() => setSelectedVisit(null)}
+  >
+    <div
+      className="w-full max-w-lg rounded-3xl bg-white p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-bold">Visit Details</h2>
+
+        <button
+          onClick={() => setSelectedVisit(null)}
+          className="rounded-lg bg-slate-100 px-3 py-1"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="space-y-3 text-sm">
+
+        <p>
+          <strong>Date:</strong>{" "}
+          {new Date(selectedVisit.visitDate).toLocaleDateString()}
+        </p>
+
+        <p>
+          <strong>Risk:</strong>{" "}
+          {selectedVisit.aiRiskResult?.riskLevel?.toUpperCase()}
+        </p>
+
+        <p>
+          <strong>BP:</strong>{" "}
+          {selectedVisit.bpSystolic}/{selectedVisit.bpDiastolic}
+        </p>
+
+        <p>
+          <strong>Hb:</strong>{" "}
+          {selectedVisit.hemoglobin} g/dL
+        </p>
+
+        <p>
+          <strong>Weight:</strong>{" "}
+          {selectedVisit.weightKg} kg
+        </p>
+
+        <p>
+          <strong>Fetal Movement:</strong>{" "}
+          {selectedVisit.fetalMovement}
+        </p>
+
+        <p>
+          <strong>Bleeding:</strong>{" "}
+          {selectedVisit.bleeding ? "Yes" : "No"}
+        </p>
+
+        <p>
+          <strong>Swelling:</strong>{" "}
+          {selectedVisit.swellingFace ? "Yes" : "No"}
+        </p>
+
+        {selectedVisit.aiRiskResult?.flags?.length > 0 && (
+          <div>
+            <strong>Flags:</strong>
+            <ul className="mt-1 list-disc pl-5">
+              {selectedVisit.aiRiskResult.flags.map((flag: string) => (
+                <li key={flag}>{flag}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-4 rounded-xl bg-slate-100 p-3">
+          <strong>Recommendation:</strong>
+          <p className="mt-1">
+            {selectedVisit.aiRiskResult?.recommendation}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
         </main>
     );
 }

@@ -28,6 +28,8 @@ export default function PatientDetailsPage() {
   const [visits, setVisits] = useState<any[]>([]);
   const latestVisit = visits?.[0];
   const [loading, setLoading] = useState(true);
+  const [selectedVisit, setSelectedVisit] = useState<any>(null);
+
 
   useEffect(() => {
     loadPatient();
@@ -803,6 +805,90 @@ export default function PatientDetailsPage() {
           </section>
         </div>
       </section>
+      {selectedVisit && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    onClick={() => setSelectedVisit(null)}
+  >
+    <div
+      className="w-full max-w-lg rounded-3xl bg-white p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-bold">Visit Details</h2>
+
+        <button
+          onClick={() => setSelectedVisit(null)}
+          className="rounded-lg bg-slate-100 px-3 py-1"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="space-y-3 text-sm">
+
+        <p>
+          <strong>Date:</strong>{" "}
+          {new Date(selectedVisit.visitDate).toLocaleDateString()}
+        </p>
+
+        <p>
+          <strong>Risk:</strong>{" "}
+          {selectedVisit.aiRiskResult?.riskLevel?.toUpperCase()}
+        </p>
+
+        <p>
+          <strong>BP:</strong>{" "}
+          {selectedVisit.bpSystolic}/{selectedVisit.bpDiastolic}
+        </p>
+
+        <p>
+          <strong>Hb:</strong>{" "}
+          {selectedVisit.hemoglobin} g/dL
+        </p>
+
+        <p>
+          <strong>Weight:</strong>{" "}
+          {selectedVisit.weightKg} kg
+        </p>
+
+        <p>
+          <strong>Fetal Movement:</strong>{" "}
+          {selectedVisit.fetalMovement}
+        </p>
+
+        <p>
+          <strong>Bleeding:</strong>{" "}
+          {selectedVisit.bleeding ? "Yes" : "No"}
+        </p>
+
+        <p>
+          <strong>Swelling:</strong>{" "}
+          {selectedVisit.swellingFace ? "Yes" : "No"}
+        </p>
+
+        {selectedVisit.aiRiskResult?.flags?.length > 0 && (
+          <div>
+            <strong>Flags:</strong>
+            <ul className="mt-1 list-disc pl-5">
+              {selectedVisit.aiRiskResult.flags.map((flag: string) => (
+                <li key={flag}>{flag}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-4 rounded-xl bg-slate-100 p-3">
+          <strong>Recommendation:</strong>
+          <p className="mt-1">
+            {selectedVisit.aiRiskResult?.recommendation}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
     </main>
   );
 }
