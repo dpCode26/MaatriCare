@@ -51,16 +51,16 @@ const doctorMenu = [
     icon: LayoutDashboard,
     href: "/doctor",
   },
-  // {
-  //   title: "High-Risk Patients",
-  //   icon: HeartPulse,
-  //   href: "/doctor/",
-  // },
   {
-    title: "District Heatmap",
-    icon: MapPinned,
-    href: "/doctor/district",
+    title: "Patients",
+    icon: HeartPulse,
+    href: "/doctor/patients",
   },
+  // {
+  //   title: "District Heatmap",
+  //   icon: MapPinned,
+  //   href: "/doctor/district",
+  // },
 ];
 
 const patientMenu = [

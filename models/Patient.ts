@@ -5,86 +5,90 @@ export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 export type OutcomeStatus = 'ongoing' | 'delivered' | 'loss' | 'referred';
 
 export interface IPatient extends Document {
-  userId:           mongoose.Types.ObjectId;
-  ashaId:           mongoose.Types.ObjectId;
-  doctorId?:        mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  ashaId: mongoose.Types.ObjectId;
+  doctorId?: mongoose.Types.ObjectId;
 
   // Identity
-  aadhaarLast4?:    string;
-  age:              number;
-  bloodGroup?:      BloodGroup;
+  aadhaarLast4?: string;
+  age: number;
+  bloodGroup?: BloodGroup;
 
   // Pregnancy
-  lmp:              Date; //last menstrual cycle
-  edd?:             Date; //exp. delivery date
-  gravida:          number; //total preg.
-  parity:           number; //births beyond viable gestation
-  abortions:        number; //terminations
+  lmp: Date; //last menstrual cycle
+  edd?: Date; //exp. delivery date
+  gravida: number; //total preg.
+  parity: number; //births beyond viable gestation
+  abortions: number; //terminations
 
   // Risk
-  riskLevel:        RiskLevel;
-  riskFlags:        string[];
-  riskUpdatedAt?:   Date;
+  riskLevel: RiskLevel;
+  riskFlags: string[];
+  riskUpdatedAt?: Date;
 
   // Contact
   emergencyContact?: string;
-  emergencyPhone?:   string;
-  address?:          string;
-  village?:          string;
-  district?:         string;
+  emergencyPhone?: string;
+  address?: string;
+  village?: string;
+  district?: string;
 
+  doctorRecommendation?: string;
+  
   // Status
-  isActive:         boolean;
-  deliveryDate?:    Date;
-  outcome:          OutcomeStatus;
+  isActive: boolean;
+  deliveryDate?: Date;
+  outcome: OutcomeStatus;
 
-  createdAt:        Date;
-  updatedAt:        Date;
+  createdAt: Date;
+  updatedAt: Date;
 
   // Virtual
-  weeksPregnant:    number;
+  weeksPregnant: number;
 }
 
 const patientSchema = new Schema<IPatient>(
   {
-    userId:   { type: Schema.Types.ObjectId, ref: 'User'},
-    ashaId:   { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    ashaId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     doctorId: { type: Schema.Types.ObjectId, ref: 'User' },
 
     // Identity
     aadhaarLast4: { type: String, maxlength: 4 },
-    age:          { type: Number, required: true },
-    bloodGroup:   { type: String, enum: ['A+','A-','B+','B-','AB+','AB-','O+','O-'] as const },
+    age: { type: Number, required: true },
+    bloodGroup: { type: String, enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const },
 
     // Pregnancy
-    lmp:       { type: Date, required: true },
-    edd:       { type: Date },
-    gravida:   { type: Number, default: 1 },
-    parity:    { type: Number, default: 0 },
+    lmp: { type: Date, required: true },
+    edd: { type: Date },
+    gravida: { type: Number, default: 1 },
+    parity: { type: Number, default: 0 },
     abortions: { type: Number, default: 0 },
 
     // Risk
-    riskLevel:     { type: String, enum: ['low', 'medium', 'high', 'critical'] as const, default: 'low' },
-    riskFlags:     [{ type: String }],
+    riskLevel: { type: String, enum: ['low', 'medium', 'high', 'critical'] as const, default: 'low' },
+    riskFlags: [{ type: String }],
     riskUpdatedAt: { type: Date },
 
     // Contact
     emergencyContact: { type: String },
-    emergencyPhone:   { type: String },
-    address:          { type: String },
-    village:          { type: String },
-    district:         { type: String },
+    emergencyPhone: { type: String },
+    address: { type: String },
+    village: { type: String },
+    district: { type: String },
+
+    doctorRecommendation: { type: String },
 
     // Status
-    isActive:     { type: Boolean, default: true },
+    isActive: { type: Boolean, default: true },
     deliveryDate: { type: Date },
-    outcome:      { type: String, enum: ['ongoing', 'delivered', 'loss', 'referred'] as const, default: 'ongoing' },
+    outcome: { type: String, enum: ['ongoing', 'delivered', 'loss', 'referred'] as const, default: 'ongoing' },
   },
   {
     timestamps: true,
-    toJSON:     { virtuals: true },  // include virtuals in API responses
-    toObject:   { virtuals: true },
-  }
+    toJSON: { virtuals: true },  // include virtuals in API responses
+    toObject: { virtuals: true },
+  },
 );
 
 patientSchema.index({ ashaId: 1 });               // ASHA fetches her patients

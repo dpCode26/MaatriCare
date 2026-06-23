@@ -29,6 +29,7 @@ export default function PatientDetailsPage() {
     const latestVisit = visits?.[0];
     const [loading, setLoading] = useState(true);
     const [selectedVisit, setSelectedVisit] = useState<any>(null);
+    const [recommendation, setRecommendation] = useState(patient?.doctorRecommendation || "");
 
     useEffect(() => {
         loadPatient();
@@ -78,28 +79,26 @@ export default function PatientDetailsPage() {
                     ? 50
                     : 20;
 
+    const saveRecommendation = async () => {
+        await fetch(
+            `/api/patients/${patient._id}/doctor-note`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    doctorRecommendation:
+                        recommendation,
+                }),
+            }
+        );
+    };
+
     return (
         <main className="min-h-screen p-2">
 
             <div className="mb-4 flex items-center justify-between">
-
-                <Link
-                    href="/asha/patients"
-                    className="
-            inline-flex items-center gap-2
-            rounded-2xl
-            border border-slate-200
-            bg-white
-            px-4 py-3
-            text-sm font-semibold
-            text-slate-700
-            transition-all duration-300
-            hover:bg-slate-50
-          "
-                >
-                    <ArrowLeft size={18} />
-                    Back To Patients
-                </Link>
 
                 {/* <div className="flex gap-3">
 
@@ -811,90 +810,168 @@ export default function PatientDetailsPage() {
                     </section>
                 </div>
             </section>
+
+            <section
+                className="
+    mt-8
+    rounded-[32px]
+    border border-slate-200
+    bg-white
+    p-7
+    shadow-[0_8px_30px_rgba(15,23,42,0.04)]
+  "
+            >
+                <div className="mb-6 flex items-center gap-3">
+                    <div
+                        className="
+        flex h-12 w-12 items-center justify-center
+        rounded-2xl
+        bg-[rgba(42,157,143,0.12)]
+      "
+                    >
+                        <FileText
+                            size={22}
+                            className="text-[var(--accent)]"
+                        />
+                    </div>
+
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900">
+                            Doctor Recommendation
+                        </h2>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                            Clinical notes and recommendations for follow-up care.
+                        </p>
+                    </div>
+                </div>
+
+                <textarea
+                    value={recommendation}
+                    onChange={(e) => setRecommendation(e.target.value)}
+                    placeholder="Write treatment plan, referral advice, medications, follow-up instructions..."
+                    rows={8}
+                    className="
+      w-full
+      resize-none
+      rounded-3xl
+      border border-slate-200
+      bg-slate-50
+      px-5
+      py-4
+      text-slate-800
+      placeholder:text-slate-400
+      outline-none
+      transition-all
+      focus:border-[var(--accent)]
+      focus:bg-white
+      focus:ring-4
+      focus:ring-[rgba(42,157,143,0.12)]
+    "
+                />
+
+                <div className="mt-5 flex justify-end">
+                    <button
+                        onClick={saveRecommendation}
+                        className="
+    rounded-2xl
+    px-6
+    py-3
+    font-semibold
+    text-white
+    transition-all
+    hover:scale-[1.02]
+    hover:opacity-90
+  "
+                    >
+                        Save
+                    </button>
+                </div>
+            </section>
+
             {selectedVisit && (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-    onClick={() => setSelectedVisit(null)}
-  >
-    <div
-      className="w-full max-w-lg rounded-3xl bg-white p-6"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold">Visit Details</h2>
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                    onClick={() => setSelectedVisit(null)}
+                >
+                    <div
+                        className="w-full max-w-lg rounded-3xl bg-white p-6"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mb-4 flex items-center justify-between">
+                            <h2 className="text-xl font-bold">Visit Details</h2>
 
-        <button
-          onClick={() => setSelectedVisit(null)}
-          className="rounded-lg bg-slate-100 px-3 py-1"
-        >
-          ✕
-        </button>
-      </div>
+                            <button
+                                onClick={() => setSelectedVisit(null)}
+                                className="rounded-lg bg-slate-100 px-3 py-1"
+                            >
+                                ✕
+                            </button>
+                        </div>
 
-      <div className="space-y-3 text-sm">
+                        <div className="space-y-3 text-sm">
+                            <p>
+                                <strong>Date:</strong>{" "}
+                                {new Date(selectedVisit.visitDate).toLocaleDateString()}
+                            </p>
 
-        <p>
-          <strong>Date:</strong>{" "}
-          {new Date(selectedVisit.visitDate).toLocaleDateString()}
-        </p>
+                            <p>
+                                <strong>Risk:</strong>{" "}
+                                {selectedVisit.aiRiskResult?.riskLevel?.toUpperCase()}
+                            </p>
 
-        <p>
-          <strong>Risk:</strong>{" "}
-          {selectedVisit.aiRiskResult?.riskLevel?.toUpperCase()}
-        </p>
+                            <p>
+                                <strong>BP:</strong>{" "}
+                                {selectedVisit.bpSystolic}/{selectedVisit.bpDiastolic}
+                            </p>
 
-        <p>
-          <strong>BP:</strong>{" "}
-          {selectedVisit.bpSystolic}/{selectedVisit.bpDiastolic}
-        </p>
+                            <p>
+                                <strong>Hb:</strong>{" "}
+                                {selectedVisit.hemoglobin} g/dL
+                            </p>
 
-        <p>
-          <strong>Hb:</strong>{" "}
-          {selectedVisit.hemoglobin} g/dL
-        </p>
+                            <p>
+                                <strong>Weight:</strong>{" "}
+                                {selectedVisit.weightKg} kg
+                            </p>
 
-        <p>
-          <strong>Weight:</strong>{" "}
-          {selectedVisit.weightKg} kg
-        </p>
+                            <p>
+                                <strong>Fetal Movement:</strong>{" "}
+                                {selectedVisit.fetalMovement}
+                            </p>
 
-        <p>
-          <strong>Fetal Movement:</strong>{" "}
-          {selectedVisit.fetalMovement}
-        </p>
+                            <p>
+                                <strong>Bleeding:</strong>{" "}
+                                {selectedVisit.bleeding ? "Yes" : "No"}
+                            </p>
 
-        <p>
-          <strong>Bleeding:</strong>{" "}
-          {selectedVisit.bleeding ? "Yes" : "No"}
-        </p>
+                            <p>
+                                <strong>Swelling:</strong>{" "}
+                                {selectedVisit.swellingFace ? "Yes" : "No"}
+                            </p>
 
-        <p>
-          <strong>Swelling:</strong>{" "}
-          {selectedVisit.swellingFace ? "Yes" : "No"}
-        </p>
+                            {selectedVisit.aiRiskResult?.flags?.length > 0 && (
+                                <div>
+                                    <strong>Flags:</strong>
+                                    <ul className="mt-1 list-disc pl-5">
+                                        {selectedVisit.aiRiskResult.flags.map((flag: string) => (
+                                            <li key={flag}>{flag}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
 
-        {selectedVisit.aiRiskResult?.flags?.length > 0 && (
-          <div>
-            <strong>Flags:</strong>
-            <ul className="mt-1 list-disc pl-5">
-              {selectedVisit.aiRiskResult.flags.map((flag: string) => (
-                <li key={flag}>{flag}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+                            <div className="mt-4 rounded-xl bg-slate-100 p-3">
+                                <strong>Recommendation:</strong>
+                                <p className="mt-1">
+                                    {selectedVisit.aiRiskResult?.recommendation}
+                                </p>
+                            </div>
 
-        <div className="mt-4 rounded-xl bg-slate-100 p-3">
-          <strong>Recommendation:</strong>
-          <p className="mt-1">
-            {selectedVisit.aiRiskResult?.recommendation}
-          </p>
-        </div>
-
-      </div>
-    </div>
-  </div>
-)}
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

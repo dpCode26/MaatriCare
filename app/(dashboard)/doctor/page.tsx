@@ -1,7 +1,7 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { socket } from "@/lib/socket-client";
 
 import {
   AlertTriangle,
@@ -13,23 +13,58 @@ export default function DoctorPage() {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchAlerts() {
-      try {
-        const res = await fetch("/api/alerts");
-        const data = await res.json();
-        console.log("ALERT API RESPONSE:", data);
-        setAlerts(Array.isArray(data) ? data : []);
+  // useEffect(() => {
+  //   async function fetchAlerts() {
+  //     try {
+  //       const res = await fetch("/api/alerts");
+  //       const data = await res.json();
+  //       console.log("ALERT API RESPONSE:", data);
+  //       setAlerts(Array.isArray(data) ? data : []);
 
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  //     } catch (err) {
+  //       console.error(err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
 
+  //   fetchAlerts();
+  // }, []);
+
+const fetchAlerts = async () => {
+  try {
+    const res = await fetch("/api/alerts");
+
+    const data = await res.json();
+
+    console.log(data);
+
+    setAlerts(
+      Array.isArray(data)
+        ? data
+        : []
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+useEffect(() => {
+
+  fetchAlerts().finally(() =>
+    setLoading(false)
+  );
+
+  socket.on("new-alert", () => {
+    console.log("NEW ALERT RECEIVED");
     fetchAlerts();
-  }, []);
+  });
+
+  return () => {
+    socket.off("new-alert");
+  };
+
+}, []);
 
   const getRiskColor = (risk: string) => {
     switch (risk?.toLowerCase()) {
@@ -170,6 +205,20 @@ export default function DoctorPage() {
                               </Link>
 
                               <button
+                                onClick={async () => {
+                                  await fetch(
+                                    `/api/alerts/${alert._id}/review`,
+                                    {
+                                      method: "PATCH",
+                                    }
+                                  );
+
+                                  setAlerts((prev) =>
+                                    prev.filter(
+                                      (item) => item._id !== alert._id
+                                    )
+                                  );
+                                }}
                                 className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium"
                               >
                                 Mark Reviewed
@@ -199,10 +248,10 @@ export default function DoctorPage() {
               </div>
             )}
           </div>
+          
           {/* DISTRICT RISK SECTION */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          {/* <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
 
-            {/* HEADER */}
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold uppercase tracking-wide text-slate-800">
@@ -219,7 +268,6 @@ export default function DoctorPage() {
               </div>
             </div>
 
-            {/* MAP */}
             <div className="overflow-hidden rounded-2xl border border-slate-200">
               <img
                 src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1200&auto=format&fit=crop"
@@ -228,7 +276,6 @@ export default function DoctorPage() {
               />
             </div>
 
-            {/* SUMMARY */}
             <div className="mt-5 rounded-2xl bg-slate-50 p-4">
               <div className="mb-2 flex items-center gap-2">
                 <BellRing className="h-4 w-4 text-emerald-600" />
@@ -244,8 +291,8 @@ export default function DoctorPage() {
                 among rural maternal patients.
               </p>
             </div>
-          </div>
-        </div>
+          </div>*/}
+        </div>  
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
 "use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import {
   Activity,
@@ -12,44 +14,159 @@ import {
 
 const symptoms = [
   {
-    label: "मतली",
-    emoji: "🤢",
-    color: "bg-emerald-100 text-emerald-700",
-  },
-  {
     label: "सिरदर्द",
+    value: "headache",
     emoji: "🤕",
     color: "bg-violet-100 text-violet-700",
   },
   {
-    label: "कमजोरी",
-    emoji: "😔",
+    label: "चक्कर",
+    value: "dizziness",
+    emoji: "😵",
     color: "bg-amber-100 text-amber-700",
   },
   {
-    label: "पेट दर्द",
-    emoji: "🤰",
+    label: "कमजोरी",
+    value: "weakness",
+    emoji: "😔",
+    color: "bg-emerald-100 text-emerald-700",
+  },
+  {
+    label: "उल्टी",
+    value: "vomiting",
+    emoji: "🤢",
     color: "bg-rose-100 text-rose-700",
+  },
+  {
+    label: "बुखार",
+    value: "fever",
+    emoji: "🤒",
+    color: "bg-red-100 text-red-700",
   },
 ];
 
 export default function PatientDashboardPage() {
+  const [patient, setPatient] = useState<any>(null);
+  const [latestVisit, setLatestVisit] = useState<any>(null);
+  const [doctorNotes, setDoctorNotes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [severity, setSeverity] =
+    useState(5);
+
+  const [notes, setNotes] =
+    useState("");
+
+  const [latestSymptom, setLatestSymptom] =
+    useState<any>(null);
+
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        const res = await fetch(
+          "/api/patients/dashboard"
+        );
+
+        const data = await res.json();
+
+        setPatient(data.patient);
+        setLatestVisit(data.latestVisit);
+        setDoctorNotes(data.doctorNotes);
+        setLatestSymptom(data.latestSymptom);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const toggleSymptom = (
+    symptom: string
+  ) => {
+    setSelectedSymptoms((prev) =>
+      prev.includes(symptom)
+        ? prev.filter(
+          (item) => item !== symptom
+        )
+        : [...prev, symptom]
+    );
+  };
+
+  const submitSymptoms = async () => {
+    try {
+
+      const aiAdvice =
+        severity >= 8
+          ? "कृपया तुरंत डॉक्टर से संपर्क करें।"
+          : severity >= 5
+            ? "आराम करें, पर्याप्त पानी पिएं और लक्षणों की निगरानी करें।"
+            : "स्थिति सामान्य प्रतीत होती है।";
+
+      const res = await fetch(
+        "/api/patients/symptoms",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            symptoms:
+              selectedSymptoms,
+            severity,
+            notes,
+            aiAdvice,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error();
+      }
+
+      alert("Symptoms logged successfully");
+
+      setLatestSymptom({
+        aiAdvice,
+      });
+
+      setSelectedSymptoms([]);
+      setSeverity(5);
+      setNotes("");
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to log symptoms");
+    }
+  };
+
   return (
     <div className="bg-[#f6faf7] p-3 md:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
 
         {/* WELCOME SECTION */}
         <div className="relative overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-r from-[var(--primary)] via-[#ee7f88] to-[var(--secondary)] p-5 text-[var(--primary-foreground)] shadow-xl">
-          
+
           <div className="flex items-start justify-between">
-            
+
             <div>
               <p className="text-sm text-emerald-50">
                 नमस्ते 👋
               </p>
 
               <h1 className="mt-1 text-2xl font-bold">
-                स्वागत है, सुमन जी
+                स्वागत है, {patient?.userId?.name} जी
               </h1>
 
               <p className="mt-2 max-w-md text-sm leading-relaxed text-emerald-50">
@@ -67,7 +184,7 @@ export default function PatientDashboardPage() {
 
             {/* RISK STATUS */}
             <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-sm">
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-500">
@@ -75,21 +192,29 @@ export default function PatientDashboardPage() {
                   </p>
 
                   <h3 className="mt-1 text-lg font-bold">
-                    सामान्य जोखिम
+                    {patient?.riskLevel || "Low Risk"}
                   </h3>
+
                 </div>
 
-                <div className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
-                  Normal
-                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-sm font-semibold ${patient?.riskLevel === "critical"
+                    ? "bg-red-100 text-red-700"
+                    : patient?.riskLevel === "high"
+                      ? "bg-orange-100 text-orange-700"
+                      : "bg-emerald-100 text-emerald-700"
+                    }`}
+                >
+                  {patient?.riskLevel}
+                </span>
               </div>
             </div>
 
             {/* NEXT APPOINTMENT */}
             <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-sm">
-              
+
               <div className="flex items-start gap-3">
-                
+
                 <div className="rounded-xl bg-emerald-100 p-2 text-emerald-700">
                   <CalendarDays className="h-5 w-5" />
                 </div>
@@ -110,9 +235,9 @@ export default function PatientDashboardPage() {
 
         {/* SYMPTOM LOGGER */}
         <div className="rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm">
-          
+
           <div className="mb-5 flex items-center justify-between">
-            
+
             <div>
               <h2 className="text-xl font-bold text-slate-900">
                 Symptom Logger
@@ -132,19 +257,85 @@ export default function PatientDashboardPage() {
           <div className="flex flex-wrap gap-3">
             {symptoms.map((symptom) => (
               <button
-                key={symptom.label}
-                className={`rounded-full px-4 py-3 text-sm font-semibold transition-all hover:scale-105 ${symptom.color}`}
+                key={symptom.value}
+                type="button"
+                onClick={() =>
+                  toggleSymptom(symptom.value)
+                }
+                className={`
+      rounded-full px-4 py-3
+      text-sm font-semibold
+      transition-all
+
+      ${selectedSymptoms.includes(
+                  symptom.value
+                )
+                    ? "bg-red-500 text-white"
+                    : symptom.color
+                  }
+    `}
               >
                 {symptom.label} {symptom.emoji}
               </button>
             ))}
           </div>
 
+          <div className="mt-6">
+
+            <label className="text-sm font-medium">
+              Severity: {severity}/10
+            </label>
+
+            <input
+              type="range"
+              min={1}
+              max={10}
+              value={severity}
+              onChange={(e) =>
+                setSeverity(
+                  Number(e.target.value)
+                )
+              }
+              className="mt-2 w-full"
+            />
+            <textarea
+              value={notes}
+              onChange={(e) =>
+                setNotes(e.target.value)
+              }
+              placeholder="अपनी समस्या हिंदी में लिखें..."
+              className="
+    mt-4
+    h-28
+    w-full
+    rounded-2xl
+    border
+    p-3
+  "
+            />
+            <button
+              type="button"
+              onClick={submitSymptoms}
+              className="
+    mt-4
+    rounded-2xl
+    bg-emerald-600
+    px-5
+    py-3
+    text-white
+    hover:bg-emerald-700
+  "
+            >
+              Submit Symptoms
+            </button>
+
+          </div>
+
           {/* AI SUGGESTION */}
           <div className="mt-6 rounded-2xl bg-[#f4a261]/10 p-4">
-            
+
             <div className="flex items-start gap-4">
-              
+
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
                 <Stethoscope className="h-6 w-6 text-emerald-600" />
               </div>
@@ -155,8 +346,10 @@ export default function PatientDashboardPage() {
                 </h3>
 
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  सिरदर्द के लिए आराम करें और पर्याप्त पानी पिएं।
-                  यदि दर्द लगातार बना रहे तो डॉक्टर से संपर्क करें।
+                  {
+                    latestSymptom?.aiAdvice ||
+                    "आज कोई स्वास्थ्य सलाह उपलब्ध नहीं है।"
+                  }
                 </p>
               </div>
 
@@ -172,9 +365,9 @@ export default function PatientDashboardPage() {
 
           {/* HEALTH RECORDS */}
           <div className="rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm">
-            
+
             <div className="mb-5 flex items-center justify-between">
-              
+
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
                   Health Records
@@ -198,7 +391,7 @@ export default function PatientDashboardPage() {
                 </p>
 
                 <h3 className="mt-2 text-2xl font-bold text-slate-900">
-                  120
+                  {latestVisit?.bpSystolic || "--"}
                 </h3>
 
                 <p className="mt-1 text-xs text-emerald-600">
@@ -212,7 +405,7 @@ export default function PatientDashboardPage() {
                 </p>
 
                 <h3 className="mt-2 text-2xl font-bold text-slate-900">
-                  62
+                  {latestVisit?.weightKg || "--"}
                 </h3>
 
                 <p className="mt-1 text-xs text-emerald-600">
@@ -226,11 +419,15 @@ export default function PatientDashboardPage() {
                 </p>
 
                 <h3 className="mt-2 text-2xl font-bold text-slate-900">
-                  11.2
+                  {latestVisit?.hemoglobin || "--"}
                 </h3>
 
                 <p className="mt-1 text-xs text-amber-600">
-                  ध्यान दें
+                  {
+                    latestVisit?.hemoglobin < 11
+                      ? "ध्यान दें"
+                      : "सामान्य"
+                  }
                 </p>
               </div>
             </div>
@@ -242,9 +439,9 @@ export default function PatientDashboardPage() {
 
           {/* EMERGENCY */}
           <div className="rounded-3xl border border-red-100 bg-white p-5 shadow-sm">
-            
+
             <div className="mb-5 flex items-center justify-between">
-              
+
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
                   Emergency Support
@@ -261,9 +458,9 @@ export default function PatientDashboardPage() {
             </div>
 
             <div className="rounded-2xl bg-red-50 p-5">
-              
+
               <div className="flex items-center gap-4">
-                
+
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg">
                   <Phone className="h-6 w-6" />
                 </div>
@@ -280,7 +477,22 @@ export default function PatientDashboardPage() {
               </div>
 
               <button className="mt-5 w-full rounded-2xl bg-red-600 py-4 text-lg font-bold text-white transition-all hover:bg-red-700">
-                Call Now
+
+                <a
+                  href={`tel:${patient?.emergencyPhone}`}
+                  className="
+    mt-5 block w-full
+    rounded-2xl
+    bg-red-600
+    py-4
+    text-center
+    text-lg
+    font-bold
+    text-white
+  "
+                >
+                  Call Now
+                </a>
               </button>
             </div>
 
@@ -290,6 +502,40 @@ export default function PatientDashboardPage() {
                 तो तुरंत सहायता लें।
               </p>
             </div>
+          </div>
+
+          <div className="rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm">
+
+            <h2 className="mb-4 text-xl font-bold">
+              Doctor Notes
+            </h2>
+
+            {
+              doctorNotes.length === 0 ? (
+                <p className="text-slate-500">
+                  No notes available.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {doctorNotes.map((note) => (
+                    <div
+                      key={note._id}
+                      className="rounded-2xl bg-slate-50 p-4"
+                    >
+                      <p className="text-sm">
+                        {note.note}
+                      </p>
+
+                      <p className="mt-2 text-xs text-slate-500">
+                        {new Date(
+                          note.createdAt
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )
+            }
           </div>
         </div>
       </div>
