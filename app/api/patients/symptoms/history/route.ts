@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getHindiAdvice } from "@/lib/gemini";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
+
 import Patient from "@/models/Patient";
 import Symptom from "@/models/Symptom";
 
-export async function POST(req: NextRequest) {
+export async function GET() {
   try {
     await connectDB();
 
@@ -29,41 +29,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-
-    const {
-      symptoms,
-      severity,
-      notes,
-    } = body;
-
-    const aiAdvice =
-      await getHindiAdvice(
-        symptoms,
-        severity,
-        patient.weeksPregnant || 0
-      );
-
-    const symptom = await Symptom.create({
+    const symptoms = await Symptom.find({
       patientId: patient._id,
-      symptoms,
-      severity,
-      notes,
-      aiAdvice,
-      escalated: severity >= 8,
+    }).sort({
+      createdAt: -1,
     });
 
-    return NextResponse.json({
-      success: true,
-      symptom,
-    });
+    return NextResponse.json(symptoms);
 
   } catch (error) {
     console.error(error);
 
     return NextResponse.json(
-      { error: "Failed to save symptoms" },
-      { status: 500 }
+      {
+        error: "Failed to fetch symptoms",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

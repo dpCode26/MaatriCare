@@ -37,6 +37,18 @@ export async function GET() {
       visitDate: -1,
     });
 
+    let nextAppointment = null;
+
+    if (latestVisit?.visitDate) {
+      nextAppointment = new Date(
+        latestVisit.visitDate
+      );
+
+      nextAppointment.setDate(
+        nextAppointment.getDate() + 30
+      );
+    }
+
     // const doctorNotes = await DoctorNote.find({
     //   patientId: patient._id,
     // }).sort({
@@ -47,14 +59,28 @@ export async function GET() {
       await Symptom.findOne({
         patientId: patient._id,
       }).sort({
-         createdAt: -1,
+        loggedAt: -1,
       });
+
+   const doctorNotes =
+  latestVisit?.aiRiskResult?.recommendation
+    ? [
+        {
+          id: "latest-visit",
+          note:
+            latestVisit.aiRiskResult.recommendation,
+          createdAt:
+            latestVisit.visitDate,
+        },
+      ]
+    : [];
 
     return NextResponse.json({
       patient,
       latestVisit,
       latestSymptom,
-      //   doctorNotes,
+      nextAppointment,
+      doctorNotes,
     });
   } catch (error) {
     console.error(error);

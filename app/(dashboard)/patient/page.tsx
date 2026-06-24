@@ -16,31 +16,26 @@ const symptoms = [
   {
     label: "सिरदर्द",
     value: "headache",
-    emoji: "🤕",
     color: "bg-violet-100 text-violet-700",
   },
   {
     label: "चक्कर",
     value: "dizziness",
-    emoji: "😵",
     color: "bg-amber-100 text-amber-700",
   },
   {
     label: "कमजोरी",
     value: "weakness",
-    emoji: "😔",
     color: "bg-emerald-100 text-emerald-700",
   },
   {
     label: "उल्टी",
     value: "vomiting",
-    emoji: "🤢",
     color: "bg-rose-100 text-rose-700",
   },
   {
     label: "बुखार",
     value: "fever",
-    emoji: "🤒",
     color: "bg-red-100 text-red-700",
   },
 ];
@@ -51,14 +46,10 @@ export default function PatientDashboardPage() {
   const [doctorNotes, setDoctorNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
-  const [severity, setSeverity] =
-    useState(5);
-
-  const [notes, setNotes] =
-    useState("");
-
-  const [latestSymptom, setLatestSymptom] =
-    useState<any>(null);
+  const [severity, setSeverity] = useState(5);
+  const [notes, setNotes] = useState("");
+  const [latestSymptom, setLatestSymptom] = useState<any>(null);
+  const [nextAppointment, setNextAppointment] = useState<any>(null);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -80,6 +71,7 @@ export default function PatientDashboardPage() {
         setLatestVisit(data.latestVisit);
         setDoctorNotes(data.doctorNotes || []);
         setLatestSymptom(data.latestSymptom || null);
+        setNextAppointment(data.nextAppointment);
       } catch (error) {
         console.error(error);
       } finally {
@@ -112,13 +104,6 @@ export default function PatientDashboardPage() {
 
   const submitSymptoms = async () => {
     try {
-      const aiAdvice =
-        severity >= 8
-          ? "कृपया तुरंत डॉक्टर से संपर्क करें।"
-          : severity >= 5
-            ? "आराम करें, पर्याप्त पानी पिएं और लक्षणों की निगरानी करें।"
-            : "स्थिति सामान्य प्रतीत होती है।";
-
       const res = await fetch(
         "/api/patients/symptoms",
         {
@@ -131,7 +116,6 @@ export default function PatientDashboardPage() {
             symptoms: selectedSymptoms,
             severity,
             notes,
-            aiAdvice,
           }),
         }
       );
@@ -141,7 +125,8 @@ export default function PatientDashboardPage() {
       }
 
       const data = await res.json();
-      setLatestSymptom(data.symptom);
+      setLatestSymptom(data.symptom || null);
+      setNextAppointment(data.nextAppointment);
 
       alert("Symptoms logged successfully");
 
@@ -213,9 +198,27 @@ export default function PatientDashboardPage() {
                       : "bg-emerald-100 text-emerald-700"
                     }`}
                 >
-                  {patient?.riskLevel}
+                  {patient?.riskLevel?.toUpperCase()} Risk
                 </span>
               </div>
+            </div>
+
+            <div className="rounded-2xl bg-white p-4 shadow-sm">
+              <p className="text-sm text-slate-500">
+                Pregnancy Progress
+              </p>
+
+              <h3 className="text-2xl font-bold text-emerald-700">
+                {patient?.weeksPregnant ?? "--"} Weeks
+              </h3>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Expected Delivery:
+                {" "}
+                {patient?.edd
+                  ? new Date(patient.edd).toLocaleDateString("en-IN")
+                  : "--"}
+              </p>
             </div>
 
             {/* NEXT APPOINTMENT */}
@@ -233,7 +236,10 @@ export default function PatientDashboardPage() {
                   </p>
 
                   <h3 className="mt-1 text-lg font-bold">
-                    25 अक्टूबर, सुबह 10 बजे
+                    {nextAppointment
+                      ? new Date(nextAppointment)
+                        .toLocaleDateString("hi-IN")
+                      : "कोई अपॉइंटमेंट नहीं"}
                   </h3>
                 </div>
               </div>
@@ -283,7 +289,7 @@ export default function PatientDashboardPage() {
                   }
     `}
               >
-                {symptom.label} {symptom.emoji}
+                {symptom.label}
               </button>
             ))}
           </div>
@@ -336,6 +342,20 @@ export default function PatientDashboardPage() {
             >
               Submit Symptoms
             </button>
+            <Link
+              href="/patient/records"
+              className="
+    ml-3
+    rounded-2xl
+    border
+    px-5
+    py-3
+    hover:bg-red-100
+    bg-[#f4a261]/30
+  "
+            >
+              View History
+            </Link>
 
           </div>
 
@@ -361,9 +381,9 @@ export default function PatientDashboardPage() {
                 </p>
               </div>
 
-              <button className="rounded-full bg-[#f4a261]/90 p-2 text-white hover:bg-emerald-700">
+              {/* <button className="rounded-full bg-[#f4a261]/90 p-2 text-white hover:bg-emerald-700">
                 <ChevronRight className="h-4 w-4" />
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -440,7 +460,7 @@ export default function PatientDashboardPage() {
                 <p className="mt-1 text-xs text-amber-600">
                   {
                     latestVisit?.hemoglobin < 11
-                      ? "ध्यान दें"
+                      ? "एनीमिया जोखिम"
                       : "सामान्य"
                   }
                 </p>
@@ -462,7 +482,7 @@ export default function PatientDashboardPage() {
     font-semibold
     text-[#e76f7a]
     transition-all
-    hover:bg-emerald-100
+    hover:bg-red-100
   "
             >
               View Full Records
@@ -512,10 +532,12 @@ export default function PatientDashboardPage() {
                 <a
                   href={`tel:${patient?.emergencyPhone}`}
                   className="
-    mt-5 block w-full
+    mt-5
+    block
+    w-full
     rounded-2xl
     bg-red-600
-    py-4
+    py-2
     text-center
     text-lg
     font-bold
@@ -541,7 +563,6 @@ export default function PatientDashboardPage() {
             <h2 className="mb-4 text-xl font-bold">
               Doctor Notes
             </h2>
-
             {
               doctorNotes.length === 0 ? (
                 <p className="text-slate-500">
@@ -549,9 +570,9 @@ export default function PatientDashboardPage() {
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {doctorNotes.map((note) => (
+                  {doctorNotes.map((note, index) => (
                     <div
-                      key={note._id}
+                      key={index}
                       className="rounded-2xl bg-slate-50 p-4"
                     >
                       <p className="text-sm">
@@ -559,9 +580,7 @@ export default function PatientDashboardPage() {
                       </p>
 
                       <p className="mt-2 text-xs text-slate-500">
-                        {new Date(
-                          note.createdAt
-                        ).toLocaleDateString()}
+                        {new Date(note.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   ))}
