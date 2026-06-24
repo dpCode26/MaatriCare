@@ -67,12 +67,19 @@ export default function PatientDashboardPage() {
           "/api/patients/dashboard"
         );
 
+        if (!res.ok) {
+          throw new Error(
+            `Request failed: ${res.status}`
+          );
+        }
+
         const data = await res.json();
+        console.log(data);
 
         setPatient(data.patient);
         setLatestVisit(data.latestVisit);
-        setDoctorNotes(data.doctorNotes);
-        setLatestSymptom(data.latestSymptom);
+        setDoctorNotes(data.doctorNotes || []);
+        setLatestSymptom(data.latestSymptom || null);
       } catch (error) {
         console.error(error);
       } finally {
@@ -476,8 +483,7 @@ export default function PatientDashboardPage() {
                 </div>
               </div>
 
-              <button className="mt-5 w-full rounded-2xl bg-red-600 py-4 text-lg font-bold text-white transition-all hover:bg-red-700">
-
+              <button className="mt-3 w-full rounded-2xl bg-red-600 text-lg font-bold text-white transition-all hover:bg-red-700">
                 <a
                   href={`tel:${patient?.emergencyPhone}`}
                   className="
