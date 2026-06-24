@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 
 import Patient from "@/models/Patient";
 import Visit from "@/models/Visit";
+import Symptom from "@/models/Symptom";
 
 export async function GET() {
   try {
@@ -22,7 +23,7 @@ export async function GET() {
       userId: session.user.id,
     }).populate("userId");
     console.log("PATIENT FOUND:", patient);
-    
+
     if (!patient) {
       return NextResponse.json(
         { error: "Patient not found" },
@@ -42,10 +43,18 @@ export async function GET() {
     //   createdAt: -1,
     // });
 
+    const latestSymptom =
+      await Symptom.findOne({
+        patientId: patient._id,
+      }).sort({
+         createdAt: -1,
+      });
+
     return NextResponse.json({
       patient,
       latestVisit,
-    //   doctorNotes,
+      latestSymptom,
+      //   doctorNotes,
     });
   } catch (error) {
     console.error(error);

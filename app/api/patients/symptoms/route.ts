@@ -19,8 +19,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-
     const patient = await Patient.findOne({
       userId: session.user.id,
     });
@@ -32,12 +30,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const body = await req.json();
+
+    const {
+      symptoms,
+      severity,
+      notes,
+    } = body;
+
+    let aiAdvice =
+      "स्थिति सामान्य प्रतीत होती है।";
+
+    if (severity >= 8) {
+      aiAdvice =
+        "कृपया तुरंत डॉक्टर या ASHA कार्यकर्ता से संपर्क करें।";
+    } else if (severity >= 5) {
+      aiAdvice =
+        "आराम करें, पानी पिएं और लक्षणों पर निगरानी रखें।";
+    }
+
     const symptom = await Symptom.create({
       patientId: patient._id,
       symptoms: body.symptoms,
       severity: body.severity,
       notes: body.notes,
       aiAdvice: body.aiAdvice,
+      escalated: severity >= 8,
     });
 
     return NextResponse.json(symptom);
@@ -46,7 +64,7 @@ export async function POST(req: NextRequest) {
     console.error(error);
 
     return NextResponse.json(
-      { error: "Failed" },
+      { error: "Failed to save symptoms" },
       { status: 500 }
     );
   }

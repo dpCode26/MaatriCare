@@ -112,7 +112,6 @@ export default function PatientDashboardPage() {
 
   const submitSymptoms = async () => {
     try {
-
       const aiAdvice =
         severity >= 8
           ? "कृपया तुरंत डॉक्टर से संपर्क करें।"
@@ -129,8 +128,7 @@ export default function PatientDashboardPage() {
               "application/json",
           },
           body: JSON.stringify({
-            symptoms:
-              selectedSymptoms,
+            symptoms: selectedSymptoms,
             severity,
             notes,
             aiAdvice,
@@ -139,14 +137,17 @@ export default function PatientDashboardPage() {
       );
 
       if (!res.ok) {
-        throw new Error();
+        throw new Error("Failed to save symptoms");
       }
+
+      const data = await res.json();
+      setLatestSymptom(data.symptom);
 
       alert("Symptoms logged successfully");
 
-      setLatestSymptom({
-        aiAdvice,
-      });
+      // setLatestSymptom({
+      //   aiAdvice,
+      // });
 
       setSelectedSymptoms([]);
       setSeverity(5);
@@ -159,7 +160,7 @@ export default function PatientDashboardPage() {
   };
 
   return (
-    <div className="bg-[#f6faf7] p-3 md:p-6">
+    <div className="p-3 md:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
 
         {/* WELCOME SECTION */}
@@ -401,8 +402,15 @@ export default function PatientDashboardPage() {
                   {latestVisit?.bpSystolic || "--"}
                 </h3>
 
-                <p className="mt-1 text-xs text-emerald-600">
-                  सामान्य
+                <p
+                  className={`mt-1 text-xs font-medium ${latestVisit?.bpSystolic >= 140
+                    ? "text-red-600"
+                    : "text-emerald-600"
+                    }`}
+                >
+                  {latestVisit?.bpSystolic >= 140
+                    ? "उच्च"
+                    : "सामान्य"}
                 </p>
               </div>
 
@@ -415,8 +423,8 @@ export default function PatientDashboardPage() {
                   {latestVisit?.weightKg || "--"}
                 </h3>
 
-                <p className="mt-1 text-xs text-emerald-600">
-                  स्थिर
+                <p className="mt-1 text-xs text-slate-500">
+                  Latest Recorded
                 </p>
               </div>
 
@@ -439,9 +447,26 @@ export default function PatientDashboardPage() {
               </div>
             </div>
 
-            <button className="mt-5 w-full rounded-2xl border border-[#f4a261]/20 bg-[#f4a261]/10 py-3 font-semibold text-[#e76f7a] transition-all hover:bg-emerald-100">
+            <Link
+              href="/patient/visits"
+              className="
+    mt-5
+    block
+    w-full
+    rounded-2xl
+    border
+    border-[#f4a261]/20
+    bg-[#f4a261]/10
+    py-3
+    text-center
+    font-semibold
+    text-[#e76f7a]
+    transition-all
+    hover:bg-emerald-100
+  "
+            >
               View Full Records
-            </button>
+            </Link>
           </div>
 
           {/* EMERGENCY */}
@@ -478,7 +503,7 @@ export default function PatientDashboardPage() {
                   </h3>
 
                   <p className="text-sm text-slate-600">
-                    ASHA Worker / Doctor Helpline
+                    {patient?.emergencyPhone}
                   </p>
                 </div>
               </div>
@@ -495,6 +520,7 @@ export default function PatientDashboardPage() {
     text-lg
     font-bold
     text-white
+    hover:bg-red-700
   "
                 >
                   Call Now
