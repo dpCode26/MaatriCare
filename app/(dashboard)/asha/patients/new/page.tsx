@@ -40,15 +40,15 @@ type PatientFormValues = z.infer<typeof patientSchema>;
 
 export default function NewPatientPage() {
   const {
-    register,
-    handleSubmit,
-  } = useForm<PatientFormValues>({
-    resolver: zodResolver(patientSchema),
-  });
+  register,
+  handleSubmit,
+} = useForm({
+  resolver: zodResolver(patientSchema),
+});
 
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: PatientFormValues) => {
     try {
       setLoading(true);
 
