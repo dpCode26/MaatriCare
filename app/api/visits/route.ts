@@ -90,6 +90,26 @@ export async function POST(req: NextRequest) {
       ashaId: session.user.id,
       aiRiskResult: finalRisk,
     });
+    if (
+      finalRisk.riskLevel === "high" ||
+      finalRisk.riskLevel === "critical"
+    ) {
+
+      const io = getIO();
+
+io.emit(
+  "new_high_risk_patient",
+  {
+    patientId: patient._id,
+    patientName:
+      (patient.userId as any)?.name,
+    riskLevel:
+      finalRisk.riskLevel,
+    visitId: visit._id,
+  }
+);
+
+    }
 
     await Patient.findByIdAndUpdate(
       body.patientId,

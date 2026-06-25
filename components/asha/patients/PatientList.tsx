@@ -52,7 +52,15 @@ export default function PatientList() {
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-sm p-4 h-full min-h-[400px] overflow-y-auto">
+    <div
+  className="
+    rounded-3xl
+    bg-white
+    p-6
+    shadow-sm
+    min-h-[650px]
+  "
+>
 
       <div className="flex items-center justify-between">
 
@@ -104,7 +112,7 @@ export default function PatientList() {
         Patient Lists
       </h3>
 
-      <div className="mt-2">
+      <div className="mt-4 grid gap-4">
         {filteredPatients.length === 0 ? (
           <p className="mt-4 text-sm text-gray-500">
             No patients found.

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { io } from "socket.io-client";
 import { socket } from "@/lib/socket-client";
 
 import {
@@ -50,20 +51,27 @@ const fetchAlerts = async () => {
 };
 
 useEffect(() => {
-
   fetchAlerts().finally(() =>
     setLoading(false)
   );
 
-  socket.on("new-alert", () => {
-    console.log("NEW ALERT RECEIVED");
-    fetchAlerts();
-  });
+  socket.on(
+    "new_high_risk_patient",
+    (data) => {
+      console.log(
+        "NEW HIGH RISK PATIENT",
+        data
+      );
+
+      fetchAlerts();
+    }
+  );
 
   return () => {
-    socket.off("new-alert");
+    socket.off(
+      "new_high_risk_patient"
+    );
   };
-
 }, []);
 
   const getRiskColor = (risk: string) => {

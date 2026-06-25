@@ -38,11 +38,11 @@ const ashaMenu = [
     icon: CalendarDays,
     href: "/asha/visits/new",
   },
-  {
-    title: "Sync Data",
-    icon: RefreshCw,
-    href: "#",
-  },
+  // {
+  //   title: "Sync Data",
+  //   icon: RefreshCw,
+  //   href: "#",
+  // },
 ];
 
 const doctorMenu = [

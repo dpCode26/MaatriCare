@@ -3,15 +3,29 @@ import { connectDB } from "@/lib/db";
 
 export async function PATCH(
   req: Request,
-  { params }: any
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
 
-  await Visit.findByIdAndUpdate(
-    params.id,
-    {
-      reviewedByDoctor: true,
-    }
+  const { id } = await params;
+
+  console.log("Review API HIT");
+  console.log("ID:", id);
+
+  const visit =
+    await Visit.findByIdAndUpdate(
+      id,
+      {
+        reviewedByDoctor: true,
+      },
+      {
+        returnDocument: "after",
+      }
+    );
+
+  console.log(
+    "Updated visit:",
+    visit?.reviewedByDoctor
   );
 
   return Response.json({

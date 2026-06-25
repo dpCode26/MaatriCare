@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {connectDB} from "@/lib/db";
+import { connectDB } from "@/lib/db";
 
 import Visit from "@/models/Visit";
 import "@/models/Patient";
@@ -15,6 +15,7 @@ export async function GET() {
 
     const alerts = await Visit.find({
       "aiRiskResult.escalate": true,
+      reviewedByDoctor: false,
     })
       .populate({
         path: "patientId",

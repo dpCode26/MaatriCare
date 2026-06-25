@@ -492,7 +492,7 @@ export default function PatientDetailsPage() {
 
                             </div>
 
-                            <button
+                            {/* <button
                                 className="
                   rounded-2xl
                   border border-slate-200
@@ -503,7 +503,7 @@ export default function PatientDetailsPage() {
                 "
                             >
                                 View All
-                            </button>
+                            </button> */}
 
                         </div>
 
@@ -514,7 +514,7 @@ export default function PatientDetailsPage() {
                                     key={visit._id}
                                     onClick={() => setSelectedVisit(visit)}
                                     className="
-    cursor-pointer
+    cursor-pointer . 
     rounded-[28px]
     border border-slate-100
     bg-slate-50/70

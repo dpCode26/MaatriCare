@@ -1,36 +1,29 @@
-import PatientList from "@/components/asha/patients/PatientList";
+import DashboardHero from "@/components/asha/dashboard/DashboardHero";
 import Stats from "@/components/asha/dashboard/Stats";
-import SymptomLogger from "@/components/asha/dashboard/SymptomLogger";
-import Records from "@/components/asha/dashboard/Records";
-import RegisterButton from "@/components/asha/dashboard/RegisterButton";
+import PatientList from "@/components/asha/patients/PatientList";
+import QuickActions from "@/components/asha/dashboard/QuickActions";
+import HighRiskPanel from "@/components/asha/dashboard/HighRiskPanel";
 
 export default function AshaDashboardPage() {
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-6">
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <DashboardHero />
 
-        {/* LEFT SECTION */}
-        <div className="xl:col-span-1">
+      <Stats />
+
+      <div className="grid gap-6 xl:grid-cols-3">
+
+        <div className="xl:col-span-2">
           <PatientList />
-          </div>
-
-        {/* RIGHT SECTION */}
-        <div className="xl:col-span-2 space-y-6">
-
-          {/* TOP CARDS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Stats />
-            <SymptomLogger />
-          </div>
-        
-          {/* CHART SECTION */}
-          <Records />
-
         </div>
-      </div>
 
-      <RegisterButton />
+        <div className="space-y-6">
+          <HighRiskPanel />
+          <QuickActions />
+        </div>
+
+      </div>
 
     </div>
   );
