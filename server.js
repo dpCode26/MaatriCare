@@ -2,6 +2,7 @@ const { createServer } = require("http");
 const next = require("next");
 const { Server } = require("socket.io");
 
+const PORT = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== "production";
 
 const app = next({ dev });
@@ -29,7 +30,7 @@ app.prepare().then(() => {
     });
   });
 
-  server.listen(3000, () => {
-    console.log("Running on port 3000");
-  });
+  server.listen(PORT, () => {
+  console.log(`Running on port ${PORT}`);
+});
 });

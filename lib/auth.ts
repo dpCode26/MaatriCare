@@ -7,7 +7,7 @@ import UserModel from "@/models/User";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
-
+  trustHost: true,
   providers: [
     Credentials({
       credentials: {

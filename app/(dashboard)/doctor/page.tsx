@@ -56,7 +56,7 @@ useEffect(() => {
   );
 
   socket.on(
-    "new_high_risk_patient",
+    "new-alert",
     (data) => {
       console.log(
         "NEW HIGH RISK PATIENT",
@@ -69,7 +69,7 @@ useEffect(() => {
 
   return () => {
     socket.off(
-      "new_high_risk_patient"
+      "new-alert"
     );
   };
 }, []);
