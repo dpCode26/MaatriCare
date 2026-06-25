@@ -197,7 +197,7 @@ function LoginContent() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
 export default function LoginPage() {
