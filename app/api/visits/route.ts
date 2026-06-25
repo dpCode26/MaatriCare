@@ -4,6 +4,7 @@ import Patient from '@/models/Patient';
 import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzePregnancyRisk } from "@/lib/gemini";
+import { getIO } from "@/lib/socket";
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,12 +33,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const previousVisits = await Visit.find({
-      patientId: body.patientId,
-    })
-      .sort({ visitDate: -1 })
-      .limit(3)
-      .select("bpSystolic bpDiastolic");
+    const previousVisits = (
+      await Visit.find({
+        patientId: body.patientId,
+      })
+        .sort({ visitDate: -1 })
+        .limit(3)
+        .select("bpSystolic bpDiastolic")
+        .lean()
+    ).map((v) => ({
+      bpSystolic: v.bpSystolic ?? 0,
+      bpDiastolic: v.bpDiastolic ?? 0,
+    }));
 
     const aiRiskResult =
       await analyzePregnancyRisk(
@@ -97,17 +104,17 @@ export async function POST(req: NextRequest) {
 
       const io = getIO();
 
-io.emit(
-  "new_high_risk_patient",
-  {
-    patientId: patient._id,
-    patientName:
-      (patient.userId as any)?.name,
-    riskLevel:
-      finalRisk.riskLevel,
-    visitId: visit._id,
-  }
-);
+      io.emit(
+        "new_high_risk_patient",
+        {
+          patientId: patient._id,
+          patientName:
+            (patient.userId as any)?.name,
+          riskLevel:
+            finalRisk.riskLevel,
+          visitId: visit._id,
+        }
+      );
 
     }
 

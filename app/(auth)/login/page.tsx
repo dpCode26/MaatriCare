@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
+import { Suspense } from "react";
 
 import {
   ShieldCheck,
@@ -12,12 +13,11 @@ import {
   Lock,
 } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginContent() {
 
   const router = useRouter()
   const searchParams = useSearchParams()
   const registered = searchParams.get('registered')
-
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -48,7 +48,7 @@ export default function LoginPage() {
     const session = await sessionRes.json()
     const role = session?.user?.role
     console.log("Session:", session);
-console.log("Role:", role);
+    console.log("Role:", role);
 
     if (role === 'asha') router.push('/asha')
     else if (role === 'doctor') router.push('/doctor')
@@ -198,4 +198,12 @@ console.log("Role:", role);
       </div>
     </main>
   )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
+  );
 }

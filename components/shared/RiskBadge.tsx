@@ -1,5 +1,5 @@
 interface RiskBadgeProps {
-  level: "low" | "medium" | "high";
+  level: "low" | "medium" | "high" | "critical";
 }
 
 export default function RiskBadge({ level }: RiskBadgeProps) {
@@ -7,7 +7,7 @@ export default function RiskBadge({ level }: RiskBadgeProps) {
   const styles = {
     low: "bg-green-200 text-green-900",
     medium: "bg-yellow-200 text-yellow-900",
-    high: "bg-red-200 text-red-900",
+    high: "bg-orange-200 text-orange-900",
     critical: "bg-red-200 text-red-900",
   };
 

@@ -23,8 +23,8 @@ interface PatientData {
 }
 
 interface PreviousVisit {
-  bpSystolic: number;
-  bpDiastolic: number;
+  bpSystolic?: number;
+  bpDiastolic?: number;
 }
 
 export interface RiskResult {
