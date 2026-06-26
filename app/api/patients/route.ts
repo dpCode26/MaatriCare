@@ -20,11 +20,30 @@ export async function GET() {
       );
     }
 
-    const patients = await Patient.find({
-      ashaId: session.user.id,
-    })
-      .populate("userId", "name phone village")
-      .sort({ createdAt: -1 });
+  let patients;
+
+if (session.user.role === "asha") {
+  patients = await Patient.find({
+    ashaId: session.user.id,
+  })
+    .populate("userId", "name phone village")
+    .sort({ createdAt: -1 });
+}
+
+else if (session.user.role === "doctor") {
+  patients = await Patient.find({
+    district: session.user.district,
+  })
+    .populate("userId", "name phone village")
+    .sort({ createdAt: -1 });
+}
+
+else {
+  return NextResponse.json(
+    { error: "Forbidden" },
+    { status: 403 }
+  );
+}
 
     return NextResponse.json(patients);
   } catch (error) {
@@ -62,7 +81,7 @@ export async function POST(req: NextRequest) {
       role: "patient",
       phone: body.phone,
       village: body.village,
-      district: body.district,
+      district: session.user.district,
     });
 
     const patient = await Patient.create({
@@ -87,7 +106,7 @@ export async function POST(req: NextRequest) {
       emergencyPhone: body.emergencyPhone,
 
       village: body.village,
-      district: body.district,
+      district: session.user.district,
       address: body.address,
     });
 

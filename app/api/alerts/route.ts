@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-
 import Visit from "@/models/Visit";
-import "@/models/Patient";
-import "@/models/User";
-
+import Patient from "@/models/Patient";
+import User from "@/models/User";
+import { auth } from "@/lib/auth";
 import mongoose from "mongoose";
 
 console.log("MODELS:", mongoose.modelNames());
@@ -12,10 +11,31 @@ console.log("MODELS:", mongoose.modelNames());
 export async function GET() {
   try {
     await connectDB();
+    const session = await auth();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    if (session.user.role !== "doctor") {
+      return NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
+    const patients = await Patient.find({
+      district: session.user.district,
+    }).select("_id");
 
     const alerts = await Visit.find({
+      patientId: {
+        $in: patients.map((p) => p._id),
+      },
       "aiRiskResult.escalate": true,
-      reviewedByDoctor: false,
     })
       .populate({
         path: "patientId",

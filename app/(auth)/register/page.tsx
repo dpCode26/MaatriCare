@@ -244,9 +244,9 @@ export default function RegisterPage() {
                     ASHA Worker
                   </option>
 
-                  <option value="patient">
+                  {/* <option value="patient">
                     Patient
-                  </option>
+                  </option> */}
 
                   <option value="doctor">
                     Doctor / PHC

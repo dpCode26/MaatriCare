@@ -25,7 +25,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const patient = await Patient.findById(body.patientId);
+    let patient;
+
+    if (session.user.role === "asha") {
+      patient = await Patient.findOne({
+        _id: body.patientId,
+        ashaId: session.user.id,
+      });
+    }
+
+    else if (session.user.role === "doctor") {
+      patient = await Patient.findOne({
+        _id: body.patientId,
+        district: session.user.district,
+      });
+    }
+    else {
+      return NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
+    }
     if (!patient) {
       return NextResponse.json(
         { error: "Patient not found" },
@@ -94,7 +114,10 @@ export async function POST(req: NextRequest) {
 
     const visit = await Visit.create({
       ...body,
-      ashaId: session.user.id,
+      patientId: patient._id,
+      ashaId: session.user.role === "asha"
+        ? session.user.id
+        : patient.ashaId,
       aiRiskResult: finalRisk,
     });
     if (
@@ -161,8 +184,42 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const patientId = searchParams.get('patientId');
 
-  const query = patientId ? { patientId } : { ashaId: session.user.id };
-  const visits = await Visit.find(query).sort({ visitDate: -1 });
+  let query = {};
+
+  if (session.user.role === "asha") {
+
+    query = patientId
+      ? {
+        patientId,
+        ashaId: session.user.id,
+      }
+      : {
+        ashaId: session.user.id,
+      };
+
+  }
+  else if (session.user.role === "doctor") {
+
+    const patients = await Patient.find({
+      district: session.user.district,
+    }).select("_id");
+
+    query = {
+      patientId: {
+        $in: patients.map((p) => p._id),
+      },
+    };
+
+  }
+  else {
+    return NextResponse.json(
+      { error: "Forbidden" },
+      { status: 403 }
+    );
+  }
+
+  const visits = await Visit.find(query)
+    .sort({ visitDate: -1 });
 
   return NextResponse.json(visits);
 }

@@ -25,9 +25,30 @@ export async function GET(
 
   const { id } = await params;
 
-  const patient = await Patient.findById(id)
-    .populate("userId", "name phone village")
-    .populate("ashaId", "name phone");
+  let patient;
+
+  if (session.user.role === "asha") {
+    patient = await Patient.findOne({
+      _id: id,
+      ashaId: session.user.id,
+    })
+      .populate("userId", "name phone village")
+      .populate("ashaId", "name phone");
+  }
+  else if (session.user.role === "doctor") {
+    patient = await Patient.findOne({
+      _id: id,
+      district: session.user.district,
+    })
+      .populate("userId", "name phone village")
+      .populate("ashaId", "name phone");
+  }
+  else {
+    return NextResponse.json(
+      { error: "Forbidden" },
+      { status: 403 }
+    );
+  }
 
   if (!patient) {
     return NextResponse.json(
@@ -67,11 +88,45 @@ export async function PUT(
 
   const body = await req.json();
 
-  const patient = await Patient.findByIdAndUpdate(
-    id,
-    body,
-    { new: true }
-  );
+  let patient;
+
+  if (session.user.role === "asha") {
+
+    patient = await Patient.findOneAndUpdate(
+      {
+        _id: id,
+        ashaId: session.user.id,
+      },
+      body,
+      { new: true }
+    );
+
+  }
+  else if (session.user.role === "doctor") {
+
+    patient = await Patient.findOneAndUpdate(
+      {
+        _id: id,
+        district: session.user.district,
+      },
+      body,
+      { new: true }
+    );
+
+  }
+  else {
+    return NextResponse.json(
+      { error: "Forbidden" },
+      { status: 403 }
+    );
+  }
+
+  if (!patient) {
+    return NextResponse.json(
+      { error: "Patient not found" },
+      { status: 404 }
+    );
+  }
 
   return NextResponse.json(patient);
 }
@@ -93,9 +148,47 @@ export async function DELETE(
 
   const { id } = await params;
 
-  await Patient.findByIdAndUpdate(id, {
-    isActive: false,
-  });
+  let patient;
+
+  if (session.user.role === "asha") {
+
+    patient = await Patient.findOneAndUpdate(
+      {
+        _id: id,
+        ashaId: session.user.id,
+      },
+      {
+        isActive: false,
+      }
+    );
+
+  }
+  else if (session.user.role === "doctor") {
+
+    patient = await Patient.findOneAndUpdate(
+      {
+        _id: id,
+        district: session.user.district,
+      },
+      {
+        isActive: false,
+      }
+    );
+
+  }
+  else {
+    return NextResponse.json(
+      { error: "Forbidden" },
+      { status: 403 }
+    );
+  }
+
+  if (!patient) {
+    return NextResponse.json(
+      { error: "Patient not found" },
+      { status: 404 }
+    );
+  }
 
   return NextResponse.json({
     success: true,
