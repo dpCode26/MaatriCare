@@ -36,6 +36,7 @@ export async function GET() {
         $in: patients.map((p) => p._id),
       },
       "aiRiskResult.escalate": true,
+      reviewedByDoctor: false,
     })
       .populate({
         path: "patientId",
